@@ -1,0 +1,11 @@
+# Altium projects
+History/
+Project Outputs*/
+Project Logs*/
+__Previews/
+*.Cam
+
+# Code
+Debug/
+Release/
+.atmel-start-backup/
