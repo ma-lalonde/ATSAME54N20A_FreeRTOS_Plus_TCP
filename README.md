@@ -7,4 +7,4 @@ This is a simple demo of an in progress FreeRTOS+TCP driver for the ATSAME54N20A
 Log
 ---
 
-2021-05-15: Working DHCP
+2021-05-15: Working DHCP, but only on 2nd try.
