@@ -977,7 +977,7 @@ drivers:
       gmac_arch_ipgs_fl_div: 1
       gmac_arch_ipgs_fl_mul: 1
       gmac_arch_mii_cfg: true
-      gmac_arch_ncfgr_caf: false
+      gmac_arch_ncfgr_caf: true
       gmac_arch_ncfgr_clk: '64'
       gmac_arch_ncfgr_dcpf: false
       gmac_arch_ncfgr_df: true
@@ -994,7 +994,7 @@ drivers:
       gmac_arch_ncfgr_pen: false
       gmac_arch_ncfgr_rfcs: false
       gmac_arch_ncfgr_rty: false
-      gmac_arch_ncfgr_rxbp: true
+      gmac_arch_ncfgr_rxbp: false
       gmac_arch_ncfgr_rxbufo: 0
       gmac_arch_ncfgr_rxcoen: true
       gmac_arch_ncfgr_spd: true

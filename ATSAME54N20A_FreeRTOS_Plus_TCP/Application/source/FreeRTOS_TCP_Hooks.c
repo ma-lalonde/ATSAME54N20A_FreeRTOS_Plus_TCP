@@ -34,6 +34,7 @@ uint16_t usDestinationPort )
 /* Defined by the application code, but called by FreeRTOS+TCP when the network
 connects/disconnects (if ipconfigUSE_NETWORK_EVENT_HOOK is set to 1 in
 FreeRTOSIPConfig.h). */
+#if ( defined( ipconfigUSE_NETWORK_EVENT_HOOK ) && ( ipconfigUSE_NETWORK_EVENT_HOOK == 1 ) )
 void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
 {
 uint32_t ulIPAddress, ulNetMask, ulGatewayAddress, ulDNSServerAddress;
@@ -84,8 +85,9 @@ char cBuffer[ 16 ];
     	//networkStatus = NETWORK_DISCONNECTED;
     }
 }
+#endif
 
-
+#if ( defined( ipconfigDHCP_REGISTER_HOSTNAME ) && ( ipconfigDHCP_REGISTER_HOSTNAME == 1 ) )
 const char *pcApplicationHostnameHook( void )
 {
 	/* Assign the name "STM32H7" to this network node.  This function will be
@@ -93,8 +95,9 @@ const char *pcApplicationHostnameHook( void )
 	plus this name. */
 	return "ATSAME5X";
 }
+#endif
 
-
+#if ( defined( ipconfigUSE_DHCP_HOOK ) && ( ipconfigUSE_DHCP_HOOK == 1 ) )
 eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase, uint32_t ulIPAddress )
 {
   eDHCPCallbackAnswer_t eReturn;
@@ -131,7 +134,7 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase, uin
 
   return eReturn;
 }
-
+#endif
 
 BaseType_t xApplicationDNSQueryHook( const char *pcName )
 {
@@ -147,7 +150,72 @@ BaseType_t xApplicationDNSQueryHook( const char *pcName )
 	return xReturn;
 }
 
+#if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
+#include "queue.h"
+extern QueueHandle_t xPingReplyQueue;
+/* If ipconfigSUPPORT_OUTGOING_PINGS is set to 1 in FreeRTOSIPConfig.h then
+ * vApplicationPingReplyHook() is called by the TCP/IP stack when the stack receives a
+ * ping reply. */
 void vApplicationPingReplyHook( ePingReplyStatus_t eStatus, uint16_t usIdentifier )
 {
-		FreeRTOS_printf( ( "Received ping ID %04X\n", usIdentifier ) );
+    switch( eStatus )
+    {
+        case eSuccess    :
+            /* A valid ping reply has been received.  Post the sequence number
+            on the queue that is read by the vSendPing() function below.  Do
+            not wait more than 10ms trying to send the message if it cannot be
+            sent immediately because this function is called from the TCP/IP
+            RTOS task - blocking in this function will block the TCP/IP RTOS task. */
+            xQueueSend( xPingReplyQueue, &usIdentifier, 10 / portTICK_PERIOD_MS );
+            break;
+
+        case eInvalidChecksum :
+        case eInvalidData :
+            /* A reply was received but it was not valid. */
+            break;
+    }
 }
+
+
+BaseType_t vSendPing( const int8_t *pcIPAddress )
+{
+uint16_t usRequestSequenceNumber, usReplySequenceNumber;
+uint32_t ulIPAddress;
+
+    /* The pcIPAddress parameter holds the destination IP address as a string in
+    decimal dot notation (for example, "192.168.0.200").  Convert the string into
+    the required 32-bit format. */
+    ulIPAddress = FreeRTOS_inet_addr( pcIPAddress );
+
+    /* Send a ping containing 8 data bytes.  Wait (in the Blocked state) a
+    maximum of 100ms for a network buffer into which the generated ping request
+    can be written and sent. */
+    usRequestSequenceNumber = FreeRTOS_SendPingRequest( ulIPAddress, 8, 100 / portTICK_PERIOD_MS );
+
+    if( usRequestSequenceNumber == pdFAIL )
+    {
+        /* The ping could not be sent because a network buffer could not be
+        obtained within 100ms of FreeRTOS_SendPingRequest() being called. */
+    }
+    else
+    {
+        /* The ping was sent.  Wait 200ms for a reply.  The sequence number from
+        each reply is sent from the vApplicationPingReplyHook() on the
+        xPingReplyQueue queue (this is not standard behaviour, but implemented in
+        the example function above).  It is assumed the queue was created before
+        this function was called! */
+        if( xQueueReceive( xPingReplyQueue,
+                           &usReplySequenceNumber,
+                           200 / portTICK_PERIOD_MS ) == pdPASS )
+        {
+            /* A ping reply was received.  Was it a reply to the ping just sent? */
+            if( usRequestSequenceNumber == usReplySequenceNumber )
+            {
+                /* This was a reply to the request just sent. */
+            }
+        }
+    }
+	return pdPASS;
+}
+#endif
+

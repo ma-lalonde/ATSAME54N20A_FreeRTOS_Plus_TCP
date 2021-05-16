@@ -5,6 +5,7 @@
 your application. */
 #include <peripheral_clk_config.h>
 
+/* As defined by __NVIC_PRIO_BITS */
 #define configPRIO_BITS 3
 
 #define configUSE_PREEMPTION                    0
@@ -13,7 +14,7 @@ your application. */
 #define configCPU_CLOCK_HZ                      CONF_CPU_FREQUENCY
 //#define configSYSTICK_CLOCK_HZ                  1000000
 #define configTICK_RATE_HZ                      1000
-#define configMAX_PRIORITIES                    5
+#define configMAX_PRIORITIES                    7
 #define configMINIMAL_STACK_SIZE                64
 #define configMAX_TASK_NAME_LEN                 32
 #define configUSE_16_BIT_TICKS                  0

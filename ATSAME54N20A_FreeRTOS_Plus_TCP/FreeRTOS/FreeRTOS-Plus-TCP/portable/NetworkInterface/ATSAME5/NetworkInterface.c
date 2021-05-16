@@ -31,7 +31,6 @@
 /* Atmel ASF includes */
 #include "hal_mac_async.h"
 #include "ethernet_phy.h"
-#include "hal_delay.h"
 #include "hpl_gmac_config.h"
 
 /* FreeRTOS includes */
@@ -72,9 +71,12 @@ TaskHandle_t xEMACTaskHandle = NULL;
 /*static SemaphoreHandle_t xTXDescriptorSemaphore = NULL; */
 
 static bool phy_link_state = pdFALSE;
-static int32_t phy_rst;
 
 static volatile BaseType_t xGMACSwitchRequired = pdTRUE;
+
+#if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
+	QueueHandle_t xPingReplyQueue = NULL;
+#endif
 
 
 void xRxCallback( void );
@@ -82,35 +84,23 @@ static void phy_link_reset();
 static void prvEMACDeferredInterruptHandlerTask( void * pvParameters );
 
 /* Start a new autonegotiation on the PHY link and wait until link is up.
- * Will also start a new negotiation every 10 seconds if link is still donw by then. */
+ * Will also start a new negotiation every 5 seconds if link is still down by then. */
 static void phy_link_reset()
 {
-    configASSERT( INCLUDE_xTaskGetSchedulerState == 1 );
-    BaseType_t schedulerState = xTaskGetSchedulerState();
-
     do
     {
-        uint8_t retry_count = 0;
+        uint16_t retry_count = 0;
 
         /* Restart an auto-negotiation */
-        phy_rst = ethernet_phy_restart_autoneg( &ETHERNET_PHY_0_desc );
-        configASSERT( phy_rst == ERR_NONE );
+        ethernet_phy_restart_autoneg( &ETHERNET_PHY_0_desc );
 
         /* Wait for PHY link up */
-        do
+        for(retry_count = 0; retry_count < 5000 && !phy_link_state; retry_count++)
         {
-            if( schedulerState == taskSCHEDULER_RUNNING )
-            {
-                vTaskDelay( 100 );
-            }
-            else
-            {
-                delay_ms( 100 );
-            }
-
-            phy_rst = ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
-        } while( phy_rst == ERR_NONE && phy_link_state != pdTRUE && retry_count < 100 );
-    } while( phy_rst != ERR_NONE || phy_link_state != pdTRUE );
+            ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
+			vTaskDelay( 1 );
+        }
+    } while( phy_link_state != pdTRUE );
 }
 
 
@@ -126,7 +116,7 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
 
     for( ; ; )
     {
-        phy_rst = ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
+        ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
 
         if( phy_link_state == pdTRUE )
         {
@@ -258,9 +248,16 @@ BaseType_t xNetworkInterfaceInitialise( void )
 		NVIC_SetPriority( GMAC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY >> (8 - configPRIO_BITS) );
         mac_async_enable_irq( &ETHERNET_MAC_0 );
         configASSERT( xResult == ERR_NONE );
+		
+		/* (Re)set PHY link */
+		phy_link_reset();
+		
+		#if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
+			xPingReplyQueue = xQueueCreate(ipconfigPING_QUEUE_SIZE, sizeof(uint16_t));
+		#endif
+		
         /* Create event handler tasks */
-        phy_link_reset();
-
+        
         xTaskCreate( prvEMACDeferredInterruptHandlerTask, /* Function that implements the task. */
                      "EMACInt",                           /* Text name for the task. */
                      256,                                 /* Stack size in words, not bytes. */
@@ -286,7 +283,7 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
      * data to be sent as two separate parameters.  The start of the data is located
      * by pxDescriptor->pucEthernetBuffer.  The length of the data is located
      * by pxDescriptor->xDataLength. */
-    phy_rst = ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
+    ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
 
     if( phy_link_state == pdTRUE )
     {

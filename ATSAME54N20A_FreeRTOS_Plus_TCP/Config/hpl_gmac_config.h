@@ -86,7 +86,7 @@
 // <i> All valid frames will be accepted
 // <id> gmac_arch_ncfgr_caf
 #ifndef CONF_GMAC_NCFGR_CAF
-#define CONF_GMAC_NCFGR_CAF 0
+#define CONF_GMAC_NCFGR_CAF 1
 #endif
 
 // <q> No broadcast
@@ -251,7 +251,7 @@
 // <i> When set, frames with non-standard preamble are not rejected.
 // <id> gmac_arch_ncfgr_rxbp
 #ifndef CONF_GMAC_NCFGR_RXBP
-#define CONF_GMAC_NCFGR_RXBP 1
+#define CONF_GMAC_NCFGR_RXBP 0
 #endif
 
 // <q> Ignore IPG GRXER

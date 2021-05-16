@@ -156,7 +156,7 @@
           <AcmeProjectActionInfo Action="File" Source="config/hpl_cmcc_config.h" IsConfig="true" Hash="bmtxQ8rLloaRtAo2HeXZRQ" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_dmac_config.h" IsConfig="true" Hash="mNec32O7w53e4vDmQlvjCA" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_gclk_config.h" IsConfig="true" Hash="MqKCQPF4UHDJp/n5bCMxQw" />
-          <AcmeProjectActionInfo Action="File" Source="config/hpl_gmac_config.h" IsConfig="true" Hash="Ukj4+iSgyT1c/HW6BWyQeA" />
+          <AcmeProjectActionInfo Action="File" Source="config/hpl_gmac_config.h" IsConfig="true" Hash="HtEZDjXCRVC4kPsW7XAAbw" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_mclk_config.h" IsConfig="true" Hash="mChAzCd38hvRSLAexPX9xQ" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_osc32kctrl_config.h" IsConfig="true" Hash="HgvzEqDUH4jq/syjj/+G+Q" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_oscctrl_config.h" IsConfig="true" Hash="fCh6frEn3wiR2nuLeATKiQ" />
@@ -227,13 +227,16 @@
       <Value>../Application/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Kernel/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM4F</Value>
-      <Value>../FreeRTOS/backoffAlgorithm/source/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Plus-TCP/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Plus-TCP/portable/Compiler/GCC</Value>
-      <Value>../FreeRTOS/coreMQTT/source/include</Value>
-      <Value>../FreeRTOS/coreMQTT/source/interface</Value>
-      <Value>../one_wire/OWI_common</Value>
-      <Value>../one_wire/OWI_polled_uart</Value>
+      <Value>../FreeRTOS/Utilities/backoff_algorithm/source/include</Value>
+      <Value>../FreeRTOS/Utilities/logging</Value>
+      <Value>../FreeRTOS/Application-Protocols/coreMQTT/source/include</Value>
+      <Value>../FreeRTOS/Application-Protocols/coreMQTT/source/interface</Value>
+      <Value>../FreeRTOS/Application-Protocols/coreMQTT-Agent/source/include</Value>
+      <Value>../FreeRTOS/Application-Protocols/network_transport/freertos_plus_tcp/using_plaintext</Value>
+      <Value>../FreeRTOS/Application-Protocols/network_transport/freertos_plus_tcp</Value>
+      <Value>../FreeRTOS/FreeRTOS-Plus-TCP/portable/NetworkInterface/include</Value>
       <Value>../Config</Value>
       <Value>../</Value>
       <Value>../examples</Value>
@@ -343,13 +346,16 @@
       <Value>../Application/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Kernel/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM4F</Value>
-      <Value>../FreeRTOS/backoffAlgorithm/source/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Plus-TCP/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Plus-TCP/portable/Compiler/GCC</Value>
-      <Value>../FreeRTOS/coreMQTT/source/include</Value>
-      <Value>../FreeRTOS/coreMQTT/source/interface</Value>
-      <Value>../one_wire/OWI_common</Value>
-      <Value>../one_wire/OWI_polled_uart</Value>
+      <Value>../FreeRTOS/Utilities/backoff_algorithm/source/include</Value>
+      <Value>../FreeRTOS/Utilities/logging</Value>
+      <Value>../FreeRTOS/Application-Protocols/coreMQTT/source/include</Value>
+      <Value>../FreeRTOS/Application-Protocols/coreMQTT/source/interface</Value>
+      <Value>../FreeRTOS/Application-Protocols/coreMQTT-Agent/source/include</Value>
+      <Value>../FreeRTOS/Application-Protocols/network_transport/freertos_plus_tcp/using_plaintext</Value>
+      <Value>../FreeRTOS/Application-Protocols/network_transport/freertos_plus_tcp</Value>
+      <Value>../FreeRTOS/FreeRTOS-Plus-TCP/portable/NetworkInterface/include</Value>
       <Value>../Config</Value>
       <Value>../</Value>
       <Value>../examples</Value>
@@ -519,6 +525,282 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="examples\driver_examples.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\source\core_mqtt_agent.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\source\core_mqtt_agent_command_functions.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\source\include\core_mqtt_agent.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\source\include\core_mqtt_agent_command_functions.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\source\include\core_mqtt_agent_message_interface.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\core_mqtt.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\core_mqtt_serializer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\core_mqtt_state.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\core_mqtt.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\core_mqtt_config_defaults.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\core_mqtt_serializer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\core_mqtt_state.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\coreMQTT\source\interface\transport_interface.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\network_transport\freertos_plus_tcp\sockets_wrapper.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\network_transport\freertos_plus_tcp\sockets_wrapper.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Application-Protocols\network_transport\freertos_plus_tcp\using_plaintext\using_plaintext.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\croutine.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\event_groups.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\atomic.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\croutine.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\deprecated_definitions.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\event_groups.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\FreeRTOS.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\list.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\message_buffer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\mpu_prototypes.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\mpu_wrappers.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\portable.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\projdefs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\queue.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\semphr.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\StackMacros.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\stack_macros.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\stream_buffer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\task.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\timers.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\list.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\port.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\portmacro.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\portable\MemMang\heap_4.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\queue.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\stream_buffer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\tasks.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Kernel\timers.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_ARP.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_DHCP.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_DNS.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_IP.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_Sockets.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_Stream_Buffer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_TCP_IP.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_TCP_WIN.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_UDP_IP.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOSIPConfigDefaults.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_ARP.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_DHCP.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_DNS.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_errno_TCP.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_IP.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_IP_Private.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_Sockets.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_Stream_Buffer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_TCP_IP.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_TCP_WIN.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_UDP_IP.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\IPTraceMacroDefaults.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\NetworkBufferManagement.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\NetworkInterface.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\BufferManagement\BufferAllocation_2.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\GCC\pack_struct_end.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\GCC\pack_struct_start.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\ATSAME5\NetworkInterface.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\Common\phyHandling.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\include\phyHandling.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Utilities\backoff_algorithm\source\backoff_algorithm.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Utilities\backoff_algorithm\source\include\backoff_algorithm.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Utilities\logging\logging.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Utilities\logging\logging_levels.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="FreeRTOS\Utilities\logging\logging_stack.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\include\core_mqtt_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\include\ethernet_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\include\FreeRTOSConfig.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\include\FreeRTOSIPConfig.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\include\led.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\include\platform.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\source\FreeRTOS_Kernel_Hooks.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\source\FreeRTOS_TCP_Hooks.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\source\led.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Application\source\platform.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Config\nv_storage_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Config\RTE_Components.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="hal\include\hal_atomic.h">
@@ -821,249 +1103,6 @@
     <Compile Include="hri\hri_wdt_e54.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Application\include\core_mqtt_config.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\ethernet_config.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\FreeRTOSConfig.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\FreeRTOSIPConfig.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\led.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\logging.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\logging_levels.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\logging_stack.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\include\platform.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\source\FreeRTOS_Kernel_Hooks.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\source\FreeRTOS_TCP_Hooks.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\source\led.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Application\source\platform.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Config\nv_storage_config.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Config\RTE_Components.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\backoffAlgorithm\source\backoff_algorithm.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\backoffAlgorithm\source\include\backoff_algorithm.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\core_mqtt.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\core_mqtt_serializer.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\core_mqtt_state.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\include\core_mqtt.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\include\core_mqtt_config_defaults.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\include\core_mqtt_serializer.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\include\core_mqtt_state.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\coreMQTT\source\interface\transport_interface.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\croutine.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\event_groups.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\atomic.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\croutine.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\deprecated_definitions.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\event_groups.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\FreeRTOS.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\list.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\message_buffer.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\mpu_prototypes.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\mpu_wrappers.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\portable.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\projdefs.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\queue.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\semphr.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\StackMacros.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\stack_macros.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\stream_buffer.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\task.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\include\timers.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\list.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\port.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\portmacro.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\portable\MemMang\heap_4.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\queue.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\stream_buffer.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\tasks.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Kernel\timers.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_ARP.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_DHCP.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_DNS.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_IP.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_Sockets.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_Stream_Buffer.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_TCP_IP.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_TCP_WIN.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\FreeRTOS_UDP_IP.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOSIPConfigDefaults.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_ARP.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_DHCP.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_DNS.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_errno_TCP.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_IP.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_IP_Private.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_Sockets.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_Stream_Buffer.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_TCP_IP.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_TCP_WIN.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\FreeRTOS_UDP_IP.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\IPTraceMacroDefaults.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\NetworkBufferManagement.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\include\NetworkInterface.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\BufferManagement\BufferAllocation_2.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\GCC\pack_struct_end.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\GCC\pack_struct_start.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\ATSAME5\NetworkInterface.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -1072,6 +1111,44 @@
     <Folder Include="documentation\" />
     <Folder Include="ethernet_phy\" />
     <Folder Include="examples\" />
+    <Folder Include="FreeRTOS\" />
+    <Folder Include="FreeRTOS\Application-Protocols\" />
+    <Folder Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\" />
+    <Folder Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\source\" />
+    <Folder Include="FreeRTOS\Application-Protocols\coreMQTT-Agent\source\include\" />
+    <Folder Include="FreeRTOS\Application-Protocols\coreMQTT\" />
+    <Folder Include="FreeRTOS\Application-Protocols\coreMQTT\source\" />
+    <Folder Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\" />
+    <Folder Include="FreeRTOS\Application-Protocols\coreMQTT\source\interface\" />
+    <Folder Include="FreeRTOS\Application-Protocols\network_transport\" />
+    <Folder Include="FreeRTOS\Application-Protocols\network_transport\freertos_plus_tcp\" />
+    <Folder Include="FreeRTOS\Application-Protocols\network_transport\freertos_plus_tcp\using_plaintext\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Kernel\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Kernel\include\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\MemMang\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\include\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\BufferManagement\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\GCC\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\ATSAME5\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\Common\" />
+    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\include\" />
+    <Folder Include="FreeRTOS\Utilities\" />
+    <Folder Include="FreeRTOS\Utilities\backoff_algorithm\" />
+    <Folder Include="FreeRTOS\Utilities\backoff_algorithm\source\" />
+    <Folder Include="FreeRTOS\Utilities\backoff_algorithm\source\include\" />
+    <Folder Include="FreeRTOS\Utilities\logging\" />
+    <Folder Include="Application\" />
+    <Folder Include="Application\include\" />
+    <Folder Include="Application\source\" />
+    <Folder Include="Config\" />
+    <Folder Include="Device_Startup\" />
     <Folder Include="hal\" />
     <Folder Include="hal\documentation\" />
     <Folder Include="hal\include\" />
@@ -1093,41 +1170,6 @@
     <Folder Include="hpl\ramecc\" />
     <Folder Include="hpl\trng\" />
     <Folder Include="hri\" />
-    <Folder Include="Application\" />
-    <Folder Include="Application\include\" />
-    <Folder Include="Application\source\" />
-    <Folder Include="Config\" />
-    <Folder Include="Device_Startup\" />
-    <Folder Include="FreeRTOS\" />
-    <Folder Include="FreeRTOS\backoffAlgorithm\" />
-    <Folder Include="FreeRTOS\backoffAlgorithm\docs\" />
-    <Folder Include="FreeRTOS\backoffAlgorithm\docs\doxygen\" />
-    <Folder Include="FreeRTOS\backoffAlgorithm\source\" />
-    <Folder Include="FreeRTOS\backoffAlgorithm\source\include\" />
-    <Folder Include="FreeRTOS\coreMQTT\" />
-    <Folder Include="FreeRTOS\coreMQTT\docs\" />
-    <Folder Include="FreeRTOS\coreMQTT\docs\doxygen\" />
-    <Folder Include="FreeRTOS\coreMQTT\docs\plantuml\" />
-    <Folder Include="FreeRTOS\coreMQTT\docs\plantuml\images\" />
-    <Folder Include="FreeRTOS\coreMQTT\source\" />
-    <Folder Include="FreeRTOS\coreMQTT\source\include\" />
-    <Folder Include="FreeRTOS\coreMQTT\source\interface\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Kernel\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Kernel\include\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\GCC\ARM_CM4F\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Kernel\portable\MemMang\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\docs\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\docs\doxygen\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\include\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\BufferManagement\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\Compiler\GCC\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\" />
-    <Folder Include="FreeRTOS\FreeRTOS-Plus-TCP\portable\NetworkInterface\ATSAME5\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Device_Startup\same54n20a_flash.ld">
@@ -1139,91 +1181,19 @@
     <None Include="documentation\micrel_ksz8081rna.rst">
       <SubType>compile</SubType>
     </None>
-    <None Include="hal\documentation\mac_async.rst">
+    <None Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\stdbool.readme">
       <SubType>compile</SubType>
     </None>
-    <None Include="hal\documentation\rand_sync.rst">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\backoffAlgorithm\docs\doxygen\config.doxyfile">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\backoffAlgorithm\docs\doxygen\layout.xml">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\backoffAlgorithm\docs\doxygen\pages.dox">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\backoffAlgorithm\docs\doxygen\style.css">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\doxygen\config.doxyfile">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\doxygen\layout.xml">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\doxygen\pages.dox">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\doxygen\porting.dox">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\doxygen\style.css">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\doxygen\timeouts.dox">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\plantuml\images\mqtt_connect_design.png">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\plantuml\images\mqtt_processloop_design.png">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\plantuml\images\mqtt_receiveloop_design.png">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\plantuml\mqtt_connect_design.pu">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\plantuml\mqtt_processloop_design.pu">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\docs\plantuml\mqtt_receiveloop_design.pu">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\source\include\stdbool.readme">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\coreMQTT\source\include\stdint.readme">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\FreeRTOS-Kernel\GitHub-FreeRTOS-Kernel-Home.url">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\FreeRTOS-Kernel\History.txt">
+    <None Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\stdint.readme">
       <SubType>compile</SubType>
     </None>
     <None Include="FreeRTOS\FreeRTOS-Kernel\include\stdint.readme">
       <SubType>compile</SubType>
     </None>
-    <None Include="FreeRTOS\FreeRTOS-Kernel\LICENSE.md">
+    <None Include="hal\documentation\mac_async.rst">
       <SubType>compile</SubType>
     </None>
-    <None Include="FreeRTOS\FreeRTOS-Kernel\Quick_Start_Guide.url">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\FreeRTOS-Kernel\README.md">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\FreeRTOS-Plus-TCP\docs\doxygen\config.doxyfile">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\FreeRTOS-Plus-TCP\docs\doxygen\layout.xml">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="FreeRTOS\FreeRTOS-Plus-TCP\docs\doxygen\style.css">
+    <None Include="hal\documentation\rand_sync.rst">
       <SubType>compile</SubType>
     </None>
   </ItemGroup>
