@@ -10,10 +10,17 @@ The project should be imported in Microchip Studio 7.0
 
 Log
 ---
+2021-05-17:
+- Added ICMP Echo (Ping) send and receive support with software CRC check (MAC offloading supports TCP, UDP and IP only)
+
+
 2021-05-16: 
 - Migrated to FreeRTOSv202104.00, which includes coreMQTT-Agent
 - Added support for PING (sending untested)
 - DHCP now working properly by toggling "Copy All Frames" in Atmel Start MAC configuration
-- TODO: Investigate MAC filtering
+- Added MAC frames filtering
+- Moved MAC and PHY initialization to NetworkInterface.c
 
-2021-05-15: Working DHCP, but only on 2nd try.
+
+2021-05-15: 
+- Working DHCP, but only on 2nd try.

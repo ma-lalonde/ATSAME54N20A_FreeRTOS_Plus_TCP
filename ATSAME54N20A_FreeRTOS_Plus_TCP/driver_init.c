@@ -87,5 +87,5 @@ void system_init(void)
 
 	RAND_0_init();
 
-	ETHERNET_MAC_0_init();
+	//ETHERNET_MAC_0_init();
 }

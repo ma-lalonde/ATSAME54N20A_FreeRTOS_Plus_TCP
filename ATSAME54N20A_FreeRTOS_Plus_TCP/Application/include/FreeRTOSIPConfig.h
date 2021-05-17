@@ -26,7 +26,7 @@
 /* TCP/IP stack constants */
 #define ipconfigIP_TASK_PRIORITY			( configMAX_PRIORITIES - 1 )
 #define ipconfigIP_TASK_STACK_SIZE_WORDS	1024
-#define ipconfigUSE_NETWORK_EVENT_HOOK		1
+#define ipconfigUSE_NETWORK_EVENT_HOOK		0
 
 /* Support PING requests */
 #define ipconfigSUPPORT_OUTGOING_PINGS		1
@@ -102,7 +102,8 @@ FreeRTOS_inet_addr_quick() takes an IP address as four separate numerical octets
 ipconfigINCLUDE_FULL_INET_ADDR is set to 1 then both FreeRTOS_inet_addr() and
 FreeRTOS_indet_addr_quick() are available.  If ipconfigINCLUDE_FULL_INET_ADDR is
 not set to 1 then only FreeRTOS_indet_addr_quick() is available. */
-#define ipconfigINCLUDE_FULL_INET_ADDR	1
+// Full INET address is only needed for sending pings in this project.
+#define ipconfigINCLUDE_FULL_INET_ADDR	0
 
 
 /* Debug, trace and logging */
@@ -113,7 +114,7 @@ not set to 1 then only FreeRTOS_indet_addr_quick() is available. */
 #define ipconfigBYTE_ORDER							pdFREERTOS_LITTLE_ENDIAN
 #define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM		1
 #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM		1
-#define ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES	0
+#define ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES	1
 #define ipconfigETHERNET_DRIVER_FILTERS_PACKETS		0
 
 #define ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES	0

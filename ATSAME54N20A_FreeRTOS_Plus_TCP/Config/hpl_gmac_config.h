@@ -86,7 +86,7 @@
 // <i> All valid frames will be accepted
 // <id> gmac_arch_ncfgr_caf
 #ifndef CONF_GMAC_NCFGR_CAF
-#define CONF_GMAC_NCFGR_CAF 1
+#define CONF_GMAC_NCFGR_CAF 0
 #endif
 
 // <q> No broadcast
@@ -151,7 +151,7 @@
 // <i> field less than 0x0600.
 // <id> gmac_arch_ncfgr_lferd
 #ifndef CONF_GMAC_NCFGR_LFERD
-#define CONF_GMAC_NCFGR_LFERD 0
+#define CONF_GMAC_NCFGR_LFERD 1
 #endif
 
 // <q> Remove FCS
@@ -160,7 +160,7 @@
 // <i> indicated will be reduced by four bytes in this mode.
 // <id> gmac_arch_ncfgr_rfcs
 #ifndef CONF_GMAC_NCFGR_RFCS
-#define CONF_GMAC_NCFGR_RFCS 0
+#define CONF_GMAC_NCFGR_RFCS 1
 #endif
 
 // <o> MDC Clock Division
@@ -211,7 +211,7 @@
 // <i> transmission of frames as required.
 // <id> gmac_arch_ncfgr_dcpf
 #ifndef CONF_GMAC_NCFGR_DCPF
-#define CONF_GMAC_NCFGR_DCPF 0
+#define CONF_GMAC_NCFGR_DCPF 1
 #endif
 
 // <q> Receive Checksum Offload Enable
