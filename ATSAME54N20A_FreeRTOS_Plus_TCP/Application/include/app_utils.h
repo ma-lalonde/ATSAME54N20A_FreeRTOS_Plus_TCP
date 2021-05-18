@@ -13,6 +13,9 @@
 #include "task.h"
 #include "FreeRTOSIPConfig.h"
 
+
+
+
 #if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
 	BaseType_t vSendPing( const uint8_t * ipAddress );
 #endif

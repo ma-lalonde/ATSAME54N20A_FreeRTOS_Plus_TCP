@@ -10,13 +10,12 @@
 
 
 
+
 #if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
 
 #include "queue.h"
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
-
-
 
 extern QueueHandle_t xPingReplyQueue;
 
@@ -66,3 +65,4 @@ uint32_t ulIPAddress;
 	return xReturn;
 }
 #endif
+

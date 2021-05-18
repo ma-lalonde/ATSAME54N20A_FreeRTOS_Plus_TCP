@@ -10,6 +10,14 @@
 #ifndef PLATFORM_H_
 #define PLATFORM_H_
 
+#define DEVICE_NAME "ATSAME54"
+#define DEVICE_NAME_UNIQUE cGetDeviceNameUnique()
+#define DEVICE_UID_LENGTH_BYTES 16
+#define DEVICE_NAME_UNIQUE_LENGTH_BYTES ( ( uint8_t ) ( sizeof( DEVICE_NAME ) + ( 2 * DEVICE_UID_LENGTH_BYTES ) + 2 ) )
+
+
+
+
 void vToggleLED();
 void vWritePin(const uint8_t pin, const bool level);
 void vHardwareInit();
@@ -30,5 +38,9 @@ int32_t lI2CRead( int16_t address, const uint8_t * buf, const uint16_t len );
 
 
 uint16_t uGetBaudRegisterValue(uint32_t baudrate);
+
+char * cGetDeviceNameUnique();
+
+
 
 #endif /* PLATFORM_H_ */

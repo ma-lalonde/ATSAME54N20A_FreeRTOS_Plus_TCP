@@ -24,10 +24,6 @@
  */
 
 
-/* Standard includes */
-//#include <stdbool.h>
-//#include <stdint.h>
-
 /* Atmel ASF includes */
 #include "hal_mac_async.h"
 #include "hpl_gmac_config.h"
@@ -43,6 +39,9 @@
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_IP_Private.h"
 #include "NetworkBufferManagement.h"
+#include "phyHandling.h"
+
+
 
 
 /***********************************************/
@@ -60,6 +59,9 @@
 	#error Transmit CRC offloading should be enabled.
 #endif
 
+#if ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
+	static const uint8_t ucLLMNR_MAC_address[] = { 0x01, 0x00, 0x5E, 0x00, 0x00, 0xFC };
+#endif
 
 
 /***********************************************/
@@ -105,6 +107,7 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters );
 extern struct mac_async_descriptor ETHERNET_MAC_0;
 
 static void prvGMACInit( void );
+
 
 /***********************************************/
 /*                PHY variables                */
@@ -221,12 +224,16 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
 
 					#if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
 					{
-						/* The ATSAME5X MAC does not support CRC offloading of ICMP packets. Calculate checksum manually. */
+						/* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
+						 * It must therefore be implemented in software. */
 						pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxBufferDescriptor->pucEthernetBuffer );
-						xICMPChecksumResult = ipCORRECT_CRC;
 						if (pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
 						{
 							xICMPChecksumResult = usGenerateProtocolChecksum( pxBufferDescriptor->pucEthernetBuffer, pxBufferDescriptor->xDataLength, pdFALSE );
+						}
+						else
+						{
+							xICMPChecksumResult = ipCORRECT_CRC; // Reset the result value in case this is not an ICMP packet.
 						}
 					}
 					#endif
@@ -303,7 +310,8 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
 		
 		#if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
 		{
-			/* The ATSAME5X MAC does not support CRC offloading of ICMP packets. Calculate checksum manually. */
+			/* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
+			 * It must therefore be implemented in software. */
 			const IPPacket_t * pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxDescriptor->pucEthernetBuffer );
 			if (pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
 			{
@@ -311,7 +319,6 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
 			}
 		}
 		#endif
-		
 		
         mac_async_write( &ETHERNET_MAC_0, pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength );
 
@@ -370,6 +377,16 @@ static void prvGMACInit()
 	memcpy(mac_filter.mac, ipLOCAL_MAC_ADDRESS, ipMAC_ADDRESS_LENGTH_BYTES);
 	mac_filter.tid_enable = false;
 	mac_async_set_filter(&ETHERNET_MAC_0, 0, &mac_filter);
+	#if ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
+	{
+		/* Set hardware filter for LLMNR capability. */
+		memcpy(mac_filter.mac, ucLLMNR_MAC_address, ipMAC_ADDRESS_LENGTH_BYTES);
+		/* LLMNR requires responders to listen to both TCP and UDP protocols. */
+		mac_filter.tid_enable = false;
+		mac_async_set_filter(&ETHERNET_MAC_0, 1, &mac_filter);
+	}
+	#endif
+	
 	
 	
 	/* Set GMAC interrupt priority to be compatible with FreeRTOS API */

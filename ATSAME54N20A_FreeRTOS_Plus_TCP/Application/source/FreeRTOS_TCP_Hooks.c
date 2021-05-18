@@ -87,13 +87,16 @@ char cBuffer[ 16 ];
 }
 #endif
 
-#if ( defined( ipconfigDHCP_REGISTER_HOSTNAME ) && ( ipconfigDHCP_REGISTER_HOSTNAME == 1 ) )
+#if ( defined( ipconfigDHCP_REGISTER_HOSTNAME ) && ( ipconfigDHCP_REGISTER_HOSTNAME == 1 ) ) \
+ || ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
+ 
+
 const char *pcApplicationHostnameHook( void )
 {
-	/* Assign the name "STM32H7" to this network node.  This function will be
-	called during the DHCP: the machine will be registered with an IP address
+	/* Assign the name to this network node.  This function will be
+	called during the DHCP or LLMNR: the machine will be registered with an IP address
 	plus this name. */
-	return "ATSAME5X";
+	return DEVICE_NAME_UNIQUE;
 }
 #endif
 

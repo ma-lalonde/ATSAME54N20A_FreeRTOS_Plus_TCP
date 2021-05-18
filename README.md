@@ -10,6 +10,10 @@ The project should be imported in Microchip Studio 7.0
 
 Log
 ---
+
+2021-05-18:
+- Implement LLMNR and unique chip ID
+
 2021-05-17:
 - Added ICMP Echo (Ping) send and receive support with software CRC check (MAC offloading supports TCP, UDP and IP only)
 
