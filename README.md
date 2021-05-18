@@ -13,7 +13,7 @@ Features
 - DHCP
 - ICMP Echo (Ping) send and receive
 - LLMNR
-- Hardware CRC check (except for ICMP, which is done in software)
+- Hardware CRC offloading (except for ICMP, which is done in software)
 - Hardware frame filtering
 
 
