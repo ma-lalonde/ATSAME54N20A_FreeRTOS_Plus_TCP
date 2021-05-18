@@ -176,7 +176,7 @@
 // <5=> 96
 // <id> gmac_arch_ncfgr_clk
 #ifndef CONF_GMAC_NCFGR_CLK
-#define CONF_GMAC_NCFGR_CLK 4
+#define CONF_GMAC_NCFGR_CLK 3
 #endif
 
 /**

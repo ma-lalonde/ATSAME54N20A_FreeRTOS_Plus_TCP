@@ -24,6 +24,7 @@ Log
 
 2021-05-18:
 - Implement LLMNR and unique chip ID
+- Fix MAC speed and duplex reconfiguration after link autonegotiation.
 
 
 2021-05-17:

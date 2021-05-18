@@ -68,7 +68,7 @@
 /*              FreeRTOS variables             */
 /***********************************************/
 
-/* Copied from FreeRTOS_IP.c */
+/* Copied from FreeRTOS_IP.c. Used for ICMP CRC calculation */
 #define ipCORRECT_CRC           0xffffU
 
 /* Also copied from FreeRTOS_IP.c */
@@ -96,6 +96,7 @@ TaskHandle_t xEMACTaskHandle = NULL;
 	QueueHandle_t xPingReplyQueue = NULL;
 #endif
 
+/* GMAC interrupt callbacks. */
 void xRxCallback( void );
 static void prvEMACDeferredInterruptHandlerTask( void * pvParameters );
 
@@ -107,7 +108,13 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters );
 extern struct mac_async_descriptor ETHERNET_MAC_0;
 
 static void prvGMACInit( void );
+static void prvGMACUpdateLinkProperties();
 
+/* Enable/Disable MDC and MDIO ports for PHY register management. */
+static inline void prvGMACEnablePHYManagementPort(bool enable);
+
+static inline void prvGMACEnable100Mbps(bool enable);
+static inline void prvGMACEnableFullDuplex(bool enable);
 
 /***********************************************/
 /*                PHY variables                */
@@ -118,13 +125,9 @@ extern struct ethernet_phy_descriptor ETHERNET_PHY_0_desc;
 
 static bool phy_link_state = pdFALSE;
 
-static void prvPHYLinkReset( void );
-static void prvPHYInit( void );
-
-
-
-
-
+/* All PHY handling code has now been separated from the NetworkInterface.c,
+ * see "../Common/phyHandling.c". */
+static EthernetPhy_t xPhyObject;
 
 
 
@@ -186,7 +189,9 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
 
     for( ; ; )
     {
+		prvGMACEnablePHYManagementPort( true );
         ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
+		prvGMACEnablePHYManagementPort( false );
 
         if( phy_link_state == pdTRUE )
         {
@@ -303,7 +308,9 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
      * data to be sent as two separate parameters.  The start of the data is located
      * by pxDescriptor->pucEthernetBuffer.  The length of the data is located
      * by pxDescriptor->xDataLength. */
+	prvGMACEnablePHYManagementPort( true );
     ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
+	prvGMACEnablePHYManagementPort( false );
 
     if( phy_link_state == pdTRUE )
     {
@@ -353,13 +360,15 @@ void xRxCallback( void )
  * configuration is saved in "hpl_gmac_config.h". */
 static void prvGMACInit()
 {
+	
 	/* Call the ASF4 generated initialization code */
 	/* Initialize GMAC clock */
 	hri_mclk_set_AHBMASK_GMAC_bit(MCLK);
 	hri_mclk_set_APBCMASK_GMAC_bit(MCLK);
 	
-	/* Apply Atmel START base configuration */
+	/* Apply Atmel START base configuration. */
 	mac_async_init(&ETHERNET_MAC_0, GMAC);
+	prvGMACEnablePHYManagementPort( false );
 	
 	/* Initialize GMAC port */
 	gpio_set_pin_function(GPIO(GPIO_PORTA, 20), PINMUX_PA20L_GMAC_GMDC);
@@ -387,8 +396,6 @@ static void prvGMACInit()
 	}
 	#endif
 	
-	
-	
 	/* Set GMAC interrupt priority to be compatible with FreeRTOS API */
 	NVIC_SetPriority( GMAC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY >> (8 - configPRIO_BITS) );
 	
@@ -396,8 +403,56 @@ static void prvGMACInit()
 	mac_async_disable_irq( &ETHERNET_MAC_0 );
 	mac_async_register_callback( &ETHERNET_MAC_0, MAC_ASYNC_RECEIVE_CB, ( FUNC_PTR ) xRxCallback );
 	mac_async_enable_irq( &ETHERNET_MAC_0 );
+	
+	
 }
 
+static void prvGMACUpdateLinkProperties()
+{
+	uint16_t phy_link_mode = 0;
+	prvGMACEnablePHYManagementPort( true );
+	mac_async_read_phy_reg(&ETHERNET_MAC_0, ETHERNET_PHY_0_desc.addr, 0x1E, &phy_link_mode);
+	prvGMACEnablePHYManagementPort( false );
+	uint8_t full_duplex = (phy_link_mode & 0b100) >> 2;
+	uint8_t speed_100_mbps = (phy_link_mode & 0b10) >> 1;
+	
+	prvGMACEnableFullDuplex(full_duplex);
+	prvGMACEnable100Mbps(speed_100_mbps);
+}
+
+static inline void prvGMACEnablePHYManagementPort(bool enable)
+{
+	if (enable)
+	{
+		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCR.reg |= GMAC_NCR_MPE;
+	}
+	else
+	{
+		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCR.reg &= ~GMAC_NCR_MPE;
+	}
+}
+static inline void prvGMACEnable100Mbps(bool enable)
+{
+	if (enable)
+	{
+		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg |= GMAC_NCFGR_SPD;
+	}
+	else
+	{
+		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg &= ~GMAC_NCFGR_SPD;
+	}
+}
+static inline void prvGMACEnableFullDuplex(bool enable)
+{
+	if (enable)
+	{
+		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg |= GMAC_NCFGR_FD;
+	}
+	else
+	{
+		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg &= ~GMAC_NCFGR_FD;
+	}
+}
 
 /*********************************************************************/
 /*                           PHY functions                           */
@@ -407,6 +462,8 @@ static void prvGMACInit()
 /* Initializes the PHY hardware. Based on ASF4 generated code. */
 static void prvPHYInit()
 {
+	prvGMACEnablePHYManagementPort( true );
+	
 	mac_async_enable(&ETHERNET_MAC_0);
 	ethernet_phy_init(&ETHERNET_PHY_0_desc, &ETHERNET_MAC_0, CONF_ETHERNET_PHY_0_IEEE8023_MII_PHY_ADDRESS);
 	#if CONF_ETHERNET_PHY_0_IEEE8023_MII_CONTROL_REG0_SETTING == 1
@@ -416,10 +473,12 @@ static void prvPHYInit()
 	/* By default, the KSZ8081RND expects a 50 MHz crystal, unlike the KSZ8081RNA */
 	#if ( defined( KSZ8081RND_25MHZ ) && KSZ8081RND_25MHZ == 1 )
 		uint16_t phy_reg_pcr2_val = 0;
-		ethernet_phy_read_reg( &ETHERNET_PHY_0_desc, KSZ8081RNA_PCR2, &phy_reg_pcr2_val );
+		mac_async_read_phy_reg(ETHERNET_MAC_0, ETHERNET_PHY_0_desc.addr, KSZ8081RNA_PCR2, &phy_reg_pcr2_val );
 		phy_reg_pcr2_val = phy_reg_pcr2_val & ( 0x1 << 7 );
-		ethernet_phy_write_reg( &ETHERNET_PHY_0_desc, KSZ8081RNA_PCR2, phy_reg_pcr2_val );
+		mac_async_write_phy_reg(ETHERNET_MAC_0, ETHERNET_PHY_0_desc.addr, KSZ8081RNA_PCR2, phy_reg_pcr2_val );
 	#endif /* ( defined( KSZ8081RND_25MHZ ) && KSZ8081RND_25MHZ == 1 ) */
+	
+	prvGMACEnablePHYManagementPort( false );
 }
 
 
@@ -427,6 +486,8 @@ static void prvPHYInit()
  * Will also start a new negotiation every 5 seconds if link is still down by then. */
 static void prvPHYLinkReset()
 {
+	prvGMACEnablePHYManagementPort( true );
+	
     do
     {
         uint16_t retry_count = 0;
@@ -440,5 +501,8 @@ static void prvPHYLinkReset()
             ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
 			vTaskDelay( 1 );
         }
+		prvGMACUpdateLinkProperties();
     } while( phy_link_state != pdTRUE );
+	
+	prvGMACEnablePHYManagementPort( false );
 }
