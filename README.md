@@ -8,7 +8,7 @@ The PCB might be published later, when the rest of the hardware is fully validat
 The project should be imported in Microchip Studio 7.0.
 
 The driver uses Atmel Start ASF4 generated MAC and PHY drivers, along with the code in [NetworkInterface.c](ATSAME54N20A_FreeRTOS_Plus_TCP/FreeRTOS/FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAME5/NetworkInterface.c).
-The demo uses many helper functions located in the [Application](ATSAME54N20A_FreeRTOS_Plus_TCP/Application) folder
+The demo uses many helper functions located in the [Application](ATSAME54N20A_FreeRTOS_Plus_TCP/Application/) folder
 
 Features
 --------
