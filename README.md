@@ -5,11 +5,13 @@ This is a simple demo of an in progress FreeRTOS+TCP driver for the ATSAME54N20A
 The test board consists of a ATSAME54N20A and a KSZ8081RNAIA, both powered by a +3V3 LDO regulator and fed by a 25 MHz clock.
 The PCB might be published later, when the rest of the hardware is fully validated.
 
-The project should be imported in Microchip Studio 7.0
+The project should be imported in Microchip Studio 7.0.
+
+The driver uses Atmel Start ASF4 generated MAC and PHY drivers, along with the code in [NetworkInterface.c](NetworkInterface.c).
+The demo uses many helper functions located in the [Application](Application) folder
 
 Features
 --------
-- Atmel Start ASF4 based MAC driver
 - DHCP
 - ICMP Echo (Ping) send and receive
 - LLMNR
