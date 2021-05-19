@@ -45,7 +45,7 @@
 /*           Configuration variables           */
 /***********************************************/
 
-/* Set to 1 is PHY part number and crystal frequency match. */
+/* Set to 1 if PHY part number and crystal frequency match. */
 #define KSZ8081RND_25MHZ    0
 
 /* Make sure someone takes care of the CRC calculation */
