@@ -24,6 +24,15 @@
  */
 
 
+/* This driver is made to work with Atmel START's ASF4 GMAC driver.
+ * The START generated GMAC initialization code should be commented out,
+ * since this driver will take care of initializing the GMAC peripheral itself.
+ *
+ * Optimal performance is obtained with:
+ * - CRC offloading enabled for both RX and TX
+ * - "Copy all frames" set to zero / off
+ */
+
 /* Atmel ASF includes */
 #include "hal_mac_async.h"
 #include "hpl_gmac_config.h"
@@ -45,9 +54,6 @@
 /*           Configuration variables           */
 /***********************************************/
 
-/* Set to 1 if PHY part number and crystal frequency match. */
-#define KSZ8081RND_25MHZ    0
-
 /* Make sure someone takes care of the CRC calculation */
 #if ( ( CONF_GMAC_NCFGR_RXCOEN == 0 ) && ( ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM == 1 ) )
     #error Receive CRC offloading should be enabled.
@@ -56,6 +62,7 @@
     #error Transmit CRC offloading should be enabled.
 #endif
 
+/* Setup LLMNR specific multicast address. */
 #if ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
     static const uint8_t ucLLMNR_MAC_address[] = { 0x01, 0x00, 0x5E, 0x00, 0x00, 0xFC };
 #endif
@@ -110,6 +117,7 @@ static void prvGMACInit( void );
 /* Enable/Disable MDC and MDIO ports for PHY register management. */
 static inline void prvGMACEnablePHYManagementPort( bool enable );
 
+/* GMAC registers configuration functions. */
 static inline void prvGMACEnable100Mbps( bool enable );
 static inline void prvGMACEnableFullDuplex( bool enable );
 
@@ -135,7 +143,7 @@ static void prvPHYLinkReset( void );
 static void prvPHYInit( void );
 static inline bool bPHYGetLinkStatus( void );
 
-/* PHY read and write functions (by the MAC). */
+/* PHY read and write functions. */
 static BaseType_t xPHYRead( BaseType_t xAddress,
                             BaseType_t xRegister,
                             uint32_t * pulValue );
@@ -235,7 +243,7 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
                     pxBufferDescriptor->xDataLength = xBytesRead;
 
 
-                    #if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
+                    #if ( ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM == 1 )
                         {
                             /* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
                              * It must therefore be implemented in software. */
@@ -428,6 +436,7 @@ static inline void prvGMACEnablePHYManagementPort( bool enable )
         ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCR.reg &= ~GMAC_NCR_MPE;
     }
 }
+
 static inline void prvGMACEnable100Mbps( bool enable )
 {
     if( enable )
@@ -439,6 +448,7 @@ static inline void prvGMACEnable100Mbps( bool enable )
         ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCFGR.reg &= ~GMAC_NCFGR_SPD;
     }
 }
+
 static inline void prvGMACEnableFullDuplex( bool enable )
 {
     if( enable )
@@ -456,7 +466,6 @@ static inline void prvGMACEnableFullDuplex( bool enable )
 /*                           PHY functions                           */
 /*********************************************************************/
 
-
 /* Initializes the PHY hardware. Based on ASF4 generated code. */
 static void prvPHYInit()
 {
@@ -468,7 +477,6 @@ static void prvPHYInit()
 
     prvGMACEnablePHYManagementPort( false );
 }
-
 
 /* Start a new link negotiation on the PHY and wait until link is up. */
 static void prvPHYLinkReset()
