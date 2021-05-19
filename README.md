@@ -25,6 +25,7 @@ Log
 2021-05-18:
 - Implement LLMNR and unique chip ID
 - Fix MAC speed and duplex reconfiguration after link autonegotiation.
+- Replace Atmel START ASF4 PHY driver with FreeRTOS+TCP's phyHandling.c
 
 
 2021-05-17:

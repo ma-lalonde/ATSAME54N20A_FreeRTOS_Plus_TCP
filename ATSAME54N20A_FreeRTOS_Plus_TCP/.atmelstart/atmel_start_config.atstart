@@ -18,23 +18,7 @@ board:
   device: SAME54N20A-AF
 details: null
 application: null
-middlewares:
-  ETHERNET_PHY_0:
-    user_label: ETHERNET_PHY_0
-    configuration:
-      ieee8023_mii_control_autoneg_en: true
-      ieee8023_mii_control_duplex_mode: full duplex
-      ieee8023_mii_control_isolate_en: false
-      ieee8023_mii_control_loopback_en: false
-      ieee8023_mii_control_powerdown_en: false
-      ieee8023_mii_control_reg0_setting: true
-      ieee8023_mii_control_speed_lsb: 100 Mb/s
-      ieee8023_mii_phy_address: 0
-    definition: Atmel:Ethernet_PHY:0.0.1::Micrel_KSZ8081RNA_Driver
-    functionality: Ethernet_PHY
-    api: Ethernet:Micrel:KSZ8081RNA
-    dependencies:
-      Communication IO: ETHERNET_MAC_0
+middlewares: {}
 drivers:
   CMCC:
     user_label: CMCC
