@@ -120,10 +120,6 @@
           <AcmeProjectActionInfo Action="File" Source="hri/hri_trng_e54.h" IsConfig="false" Hash="R3m9qAqgpkl9Ay6TqH3M2A" />
           <AcmeProjectActionInfo Action="File" Source="hri/hri_usb_e54.h" IsConfig="false" Hash="I+Mpxa40hh4o1NE68Zi5Gg" />
           <AcmeProjectActionInfo Action="File" Source="hri/hri_wdt_e54.h" IsConfig="false" Hash="CfZas1TGXPKWyHJU+xHJ7A" />
-          <AcmeProjectActionInfo Action="File" Source="ethernet_phy/ethernet_phy.c" IsConfig="false" Hash="JjCot12s6Vr3LaCLNfWmnA" />
-          <AcmeProjectActionInfo Action="File" Source="ethernet_phy/ethernet_phy.h" IsConfig="false" Hash="q+j6+akFjD1GE0rErBV5XA" />
-          <AcmeProjectActionInfo Action="File" Source="ethernet_phy/ieee8023_mii_standard_register.h" IsConfig="false" Hash="EV5qmqdVr8Wik4/yBUuhUg" />
-          <AcmeProjectActionInfo Action="File" Source="ethernet_phy/ksz8081rna.h" IsConfig="false" Hash="mEjAARybjiChw2dAux36sg" />
           <AcmeProjectActionInfo Action="File" Source="main.c" IsConfig="false" Hash="k0AH7j+BrmdFhBPzCCMptA" />
           <AcmeProjectActionInfo Action="File" Source="driver_init.c" IsConfig="false" Hash="OpkNntRj5Wtcmkwz0KuMCA" />
           <AcmeProjectActionInfo Action="File" Source="driver_init.h" IsConfig="false" Hash="Pj/P7uWBuu1Q9nzBDYEPKw" />
@@ -149,9 +145,7 @@
           <AcmeProjectActionInfo Action="File" Source="hpl/port/hpl_gpio_base.h" IsConfig="false" Hash="d+x/HgDlHjC9REAZe4D1bA" />
           <AcmeProjectActionInfo Action="File" Source="hpl/ramecc/hpl_ramecc.c" IsConfig="false" Hash="pMdmwVWBg16VG8HOwA3DPw" />
           <AcmeProjectActionInfo Action="File" Source="hpl/trng/hpl_trng.c" IsConfig="false" Hash="ozPpMlinY/ncU3MYQsLTow" />
-          <AcmeProjectActionInfo Action="File" Source="ethernet_phy_main.c" IsConfig="false" Hash="9PnGnZ9Lp45nn37tCwHecg" />
-          <AcmeProjectActionInfo Action="File" Source="ethernet_phy_main.h" IsConfig="false" Hash="JjXE6BNHU2CDF0zFyzAqnw" />
-          <AcmeProjectActionInfo Action="File" Source="atmel_start.h" IsConfig="false" Hash="Ojb72ws5TqneshFVHVqzqg" />
+          <AcmeProjectActionInfo Action="File" Source="atmel_start.h" IsConfig="false" Hash="9RBG5E2ViQiSP2Gn4/FGpA" />
           <AcmeProjectActionInfo Action="File" Source="atmel_start.c" IsConfig="false" Hash="kmTGXItxOA1SBkNfImIweA" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_cmcc_config.h" IsConfig="true" Hash="bmtxQ8rLloaRtAo2HeXZRQ" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_dmac_config.h" IsConfig="true" Hash="mNec32O7w53e4vDmQlvjCA" />
@@ -163,7 +157,6 @@
           <AcmeProjectActionInfo Action="File" Source="config/hpl_port_config.h" IsConfig="true" Hash="q78dOqqSQQP36czagr8gcQ" />
           <AcmeProjectActionInfo Action="File" Source="config/hpl_trng_config.h" IsConfig="true" Hash="w2k+3QQFGr1vF7NGmKdLLQ" />
           <AcmeProjectActionInfo Action="File" Source="config/peripheral_clk_config.h" IsConfig="true" Hash="I1dZ5CFAkmmFJiCz2itzCw" />
-          <AcmeProjectActionInfo Action="File" Source="config/ieee8023_mii_standard_config.h" IsConfig="true" Hash="7XXLeGb4yY0gYmguQ6cB8g" />
         </AcmeActionInfos>
         <NonsecureFilesInfo />
       </AcmeProjectConfig>
@@ -254,7 +247,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
@@ -296,7 +288,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
@@ -320,7 +311,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
@@ -373,7 +363,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
@@ -415,7 +404,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
@@ -440,7 +428,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
@@ -491,9 +478,6 @@
     <Compile Include="Config\hpl_trng_config.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Config\ieee8023_mii_standard_config.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="Config\peripheral_clk_config.h">
       <SubType>compile</SubType>
     </Compile>
@@ -507,24 +491,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="driver_init.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ethernet_phy\ethernet_phy.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ethernet_phy\ethernet_phy.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ethernet_phy\ieee8023_mii_standard_register.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ethernet_phy\ksz8081rna.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ethernet_phy_main.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ethernet_phy_main.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="examples\driver_examples.c">
@@ -1114,8 +1080,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="documentation\" />
-    <Folder Include="ethernet_phy\" />
     <Folder Include="examples\" />
     <Folder Include="FreeRTOS\" />
     <Folder Include="FreeRTOS\Application-Protocols\" />
@@ -1182,9 +1146,6 @@
       <SubType>compile</SubType>
     </None>
     <None Include="Device_Startup\same54n20a_sram.ld">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="documentation\micrel_ksz8081rna.rst">
       <SubType>compile</SubType>
     </None>
     <None Include="FreeRTOS\Application-Protocols\coreMQTT\source\include\stdbool.readme">

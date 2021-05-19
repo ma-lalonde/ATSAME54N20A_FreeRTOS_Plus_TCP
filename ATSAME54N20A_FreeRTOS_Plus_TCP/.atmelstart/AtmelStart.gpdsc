@@ -125,11 +125,6 @@
         <file category="header" condition="ARMCC, GCC, IAR" name="hri/hri_trng_e54.h"/>
         <file category="header" condition="ARMCC, GCC, IAR" name="hri/hri_usb_e54.h"/>
         <file category="header" condition="ARMCC, GCC, IAR" name="hri/hri_wdt_e54.h"/>
-        <file category="doc" condition="ARMCC, GCC, IAR" name="documentation/micrel_ksz8081rna.rst"/>
-        <file category="source" condition="ARMCC, GCC, IAR" name="ethernet_phy/ethernet_phy.c"/>
-        <file category="header" condition="ARMCC, GCC, IAR" name="ethernet_phy/ethernet_phy.h"/>
-        <file category="header" condition="ARMCC, GCC, IAR" name="ethernet_phy/ieee8023_mii_standard_register.h"/>
-        <file category="header" condition="ARMCC, GCC, IAR" name="ethernet_phy/ksz8081rna.h"/>
         <file category="source" condition="ARMCC, GCC, IAR" name="main.c"/>
         <file category="source" condition="ARMCC, GCC, IAR" name="driver_init.c"/>
         <file category="header" condition="ARMCC, GCC, IAR" name="driver_init.h"/>
@@ -155,8 +150,6 @@
         <file category="header" condition="ARMCC, GCC, IAR" name="hpl/port/hpl_gpio_base.h"/>
         <file category="source" condition="ARMCC, GCC, IAR" name="hpl/ramecc/hpl_ramecc.c"/>
         <file category="source" condition="ARMCC, GCC, IAR" name="hpl/trng/hpl_trng.c"/>
-        <file category="source" condition="ARMCC, GCC, IAR" name="ethernet_phy_main.c"/>
-        <file category="header" condition="ARMCC, GCC, IAR" name="ethernet_phy_main.h"/>
         <file category="header" condition="ARMCC, GCC, IAR" name="atmel_start.h"/>
         <file category="source" condition="ARMCC, GCC, IAR" name="atmel_start.c"/>
         <file attr="config" category="header" condition="ARMCC, GCC, IAR" name="config/hpl_cmcc_config.h"/>
@@ -169,7 +162,6 @@
         <file attr="config" category="header" condition="ARMCC, GCC, IAR" name="config/hpl_port_config.h"/>
         <file attr="config" category="header" condition="ARMCC, GCC, IAR" name="config/hpl_trng_config.h"/>
         <file attr="config" category="header" condition="ARMCC, GCC, IAR" name="config/peripheral_clk_config.h"/>
-        <file attr="config" category="header" condition="ARMCC, GCC, IAR" name="config/ieee8023_mii_standard_config.h"/>
         <file category="include" condition="ARMCC, GCC, IAR" name=""/>
         <file category="include" condition="ARMCC, GCC, IAR" name="config"/>
         <file category="include" condition="ARMCC, GCC, IAR" name="examples"/>
@@ -187,9 +179,6 @@
         <file category="include" condition="ARMCC, GCC, IAR" name="hpl/ramecc"/>
         <file category="include" condition="ARMCC, GCC, IAR" name="hpl/trng"/>
         <file category="include" condition="ARMCC, GCC, IAR" name="hri"/>
-        <file category="include" condition="ARMCC, GCC, IAR" name=""/>
-        <file category="include" condition="ARMCC, GCC, IAR" name="config"/>
-        <file category="include" condition="ARMCC, GCC, IAR" name="ethernet_phy"/>
         <file category="include" condition="ARMCC, GCC, IAR" name=""/>
       </files>
     </component>

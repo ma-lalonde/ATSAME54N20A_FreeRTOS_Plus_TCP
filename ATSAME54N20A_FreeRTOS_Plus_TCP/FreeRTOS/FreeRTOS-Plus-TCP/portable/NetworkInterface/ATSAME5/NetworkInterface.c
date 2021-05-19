@@ -28,8 +28,6 @@
 #include "hal_mac_async.h"
 #include "hpl_gmac_config.h"
 #include "hal_gpio.h"
-#include "ethernet_phy.h"
-#include "ieee8023_mii_standard_config.h"
 
 /* FreeRTOS includes */
 #include "FreeRTOS.h"
@@ -43,7 +41,6 @@
 
 
 
-
 /***********************************************/
 /*           Configuration variables           */
 /***********************************************/
@@ -52,15 +49,15 @@
 #define KSZ8081RND_25MHZ    0
 
 /* Make sure someone takes care of the CRC calculation */
-#if ( (CONF_GMAC_NCFGR_RXCOEN == 0 ) && ( ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM == 1 ) )
-	#error Receive CRC offloading should be enabled.
+#if ( ( CONF_GMAC_NCFGR_RXCOEN == 0 ) && ( ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM == 1 ) )
+    #error Receive CRC offloading should be enabled.
 #endif
 #if ( ( CONF_GMAC_DCFGR_TXCOEN == 0 ) && ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 ) )
-	#error Transmit CRC offloading should be enabled.
+    #error Transmit CRC offloading should be enabled.
 #endif
 
 #if ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
-	static const uint8_t ucLLMNR_MAC_address[] = { 0x01, 0x00, 0x5E, 0x00, 0x00, 0xFC };
+    static const uint8_t ucLLMNR_MAC_address[] = { 0x01, 0x00, 0x5E, 0x00, 0x00, 0xFC };
 #endif
 
 
@@ -69,9 +66,10 @@
 /***********************************************/
 
 /* Copied from FreeRTOS_IP.c. Used for ICMP CRC calculation */
-#define ipCORRECT_CRC           0xffffU
+#define ipCORRECT_CRC    0xffffU
 
 /* Also copied from FreeRTOS_IP.c */
+
 /** @brief If ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES is set to 1, then the Ethernet
  * driver will filter incoming packets and only pass the stack those packets it
  * considers need processing.  In this case ipCONSIDER_FRAME_FOR_PROCESSING() can
@@ -91,9 +89,9 @@
  * related interrupts. */
 TaskHandle_t xEMACTaskHandle = NULL;
 
-/* The PING response queue */ 
+/* The PING response queue */
 #if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
-	QueueHandle_t xPingReplyQueue = NULL;
+    QueueHandle_t xPingReplyQueue = NULL;
 #endif
 
 /* GMAC interrupt callbacks. */
@@ -108,28 +106,42 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters );
 extern struct mac_async_descriptor ETHERNET_MAC_0;
 
 static void prvGMACInit( void );
-static void prvGMACUpdateLinkProperties();
 
 /* Enable/Disable MDC and MDIO ports for PHY register management. */
-static inline void prvGMACEnablePHYManagementPort(bool enable);
+static inline void prvGMACEnablePHYManagementPort( bool enable );
 
-static inline void prvGMACEnable100Mbps(bool enable);
-static inline void prvGMACEnableFullDuplex(bool enable);
+static inline void prvGMACEnable100Mbps( bool enable );
+static inline void prvGMACEnableFullDuplex( bool enable );
+
 
 /***********************************************/
 /*                PHY variables                */
 /***********************************************/
 
-/* The Ethernet PHY instance created by ASF4 */
-extern struct ethernet_phy_descriptor ETHERNET_PHY_0_desc;
-
-static bool phy_link_state = pdFALSE;
-
 /* All PHY handling code has now been separated from the NetworkInterface.c,
  * see "../Common/phyHandling.c". */
 static EthernetPhy_t xPhyObject;
 
+/* PHY link preferences. */
+/* Set both speed and Duplex to AUTO, or give them BOTH manual values. */
+const PhyProperties_t xPHYProperties =
+{
+    .ucSpeed  = PHY_SPEED_AUTO,
+    .ucDuplex = PHY_DUPLEX_AUTO,
+    .ucMDI_X  = PHY_MDIX_AUTO,
+};
 
+static void prvPHYLinkReset( void );
+static void prvPHYInit( void );
+static inline bool bPHYGetLinkStatus( void );
+
+/* PHY read and write functions (by the MAC). */
+static BaseType_t xPHYRead( BaseType_t xAddress,
+                            BaseType_t xRegister,
+                            uint32_t * pulValue );
+static BaseType_t xPHYWrite( BaseType_t xAddress,
+                             BaseType_t xRegister,
+                             uint32_t pulValue );
 
 
 /*********************************************************************/
@@ -146,18 +158,18 @@ BaseType_t xNetworkInterfaceInitialise( void )
 
     if( xEMACTaskHandle == NULL )
     {
-		/* Initialize MAC and PHY */
-		prvGMACInit();
-		prvPHYInit();
+        /* Initialize MAC and PHY */
+        prvGMACInit();
+        prvPHYInit();
 
-		/* (Re)set PHY link */
-		prvPHYLinkReset();
-		
-		/* Initialize PING capability */
-		#if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
-			xPingReplyQueue = xQueueCreate(ipconfigPING_QUEUE_SIZE, sizeof(uint16_t));
-		#endif
-		
+        /* (Re)set PHY link */
+        prvPHYLinkReset();
+
+        /* Initialize PING capability */
+        #if ( defined( ipconfigSUPPORT_OUTGOING_PINGS ) && ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) )
+            xPingReplyQueue = xQueueCreate( ipconfigPING_QUEUE_SIZE, sizeof( uint16_t ) );
+        #endif
+
         /* Create event handler task */
         xTaskCreate( prvEMACDeferredInterruptHandlerTask, /* Function that implements the task. */
                      "EMACInt",                           /* Text name for the task. */
@@ -169,18 +181,17 @@ BaseType_t xNetworkInterfaceInitialise( void )
         configASSERT( xEMACTaskHandle );
     }
 
-    return phy_link_state;
+    return bPHYGetLinkStatus();
 }
 
 
 static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
 {
     NetworkBufferDescriptor_t * pxBufferDescriptor;
-    size_t xBytesReceived;
-    size_t xBytesRead;
+    size_t xBytesReceived = 0, xBytesRead = 0;
 
-	uint16_t xICMPChecksumResult = ipCORRECT_CRC;
-	const IPPacket_t * pxIPPacket;
+    uint16_t xICMPChecksumResult = ipCORRECT_CRC;
+    const IPPacket_t * pxIPPacket;
 
 
     /* Used to indicate that xSendEventStructToIPTask() is being called because
@@ -189,11 +200,7 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
 
     for( ; ; )
     {
-		prvGMACEnablePHYManagementPort( true );
-        ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
-		prvGMACEnablePHYManagementPort( false );
-
-        if( phy_link_state == pdTRUE )
+        if( bPHYGetLinkStatus() )
         {
             /* Wait for the Ethernet MAC interrupt to indicate that another packet
              * has been received.  The task notification is used in a similar way to a
@@ -205,6 +212,7 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
              * a peripheral driver function that returns the number of bytes in the
              * received Ethernet frame. */
             xBytesReceived = mac_async_read_len( &ETHERNET_MAC_0 );
+
             if( xBytesReceived > 0 )
             {
                 /* Allocate a network buffer descriptor that points to a buffer
@@ -227,28 +235,29 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
                     pxBufferDescriptor->xDataLength = xBytesRead;
 
 
-					#if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
-					{
-						/* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
-						 * It must therefore be implemented in software. */
-						pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxBufferDescriptor->pucEthernetBuffer );
-						if (pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
-						{
-							xICMPChecksumResult = usGenerateProtocolChecksum( pxBufferDescriptor->pucEthernetBuffer, pxBufferDescriptor->xDataLength, pdFALSE );
-						}
-						else
-						{
-							xICMPChecksumResult = ipCORRECT_CRC; // Reset the result value in case this is not an ICMP packet.
-						}
-					}
-					#endif
-					
+                    #if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
+                        {
+                            /* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
+                             * It must therefore be implemented in software. */
+                            pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxBufferDescriptor->pucEthernetBuffer );
+
+                            if( pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
+                            {
+                                xICMPChecksumResult = usGenerateProtocolChecksum( pxBufferDescriptor->pucEthernetBuffer, pxBufferDescriptor->xDataLength, pdFALSE );
+                            }
+                            else
+                            {
+                                xICMPChecksumResult = ipCORRECT_CRC; /* Reset the result value in case this is not an ICMP packet. */
+                            }
+                        }
+                    #endif /* if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 ) */
+
                     /* See if the data contained in the received Ethernet frame needs
-                     * to be processed.  NOTE! It is preferable to do this in
-                     * the interrupt service routine itself, which would remove the need
-                     * to unblock this task for packets that don't need processing. */
-                    if( ipCONSIDER_FRAME_FOR_PROCESSING( pxBufferDescriptor->pucEthernetBuffer ) == eProcessBuffer 
-					    && xICMPChecksumResult == ipCORRECT_CRC)
+                    * to be processed.  NOTE! It is preferable to do this in
+                    * the interrupt service routine itself, which would remove the need
+                    * to unblock this task for packets that don't need processing. */
+                    if( ( ipCONSIDER_FRAME_FOR_PROCESSING( pxBufferDescriptor->pucEthernetBuffer ) == eProcessBuffer ) &&
+                        ( xICMPChecksumResult == ipCORRECT_CRC ) )
                     {
                         /* The event about to be sent to the TCP/IP is an Rx event. */
                         xRxEvent.eEventType = eNetworkRxEvent;
@@ -271,7 +280,7 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
                         else
                         {
                             /* The message was successfully sent to the TCP/IP stack.
-                             * Call the standard trace macro to log the occurrence. */
+                            * Call the standard trace macro to log the occurrence. */
                             iptraceNETWORK_INTERFACE_RECEIVE();
                         }
                     }
@@ -290,10 +299,15 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
                 }
             }
         }
-        else
+
+        prvGMACEnablePHYManagementPort( true );
+
+        if( xPhyCheckLinkStatus( &xPhyObject, xBytesReceived ) )
         {
             prvPHYLinkReset();
         }
+
+        prvGMACEnablePHYManagementPort( false );
     }
 }
 
@@ -308,25 +322,22 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
      * data to be sent as two separate parameters.  The start of the data is located
      * by pxDescriptor->pucEthernetBuffer.  The length of the data is located
      * by pxDescriptor->xDataLength. */
-	prvGMACEnablePHYManagementPort( true );
-    ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
-	prvGMACEnablePHYManagementPort( false );
 
-    if( phy_link_state == pdTRUE )
+    if( bPHYGetLinkStatus() )
     {
-		
-		#if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
-		{
-			/* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
-			 * It must therefore be implemented in software. */
-			const IPPacket_t * pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxDescriptor->pucEthernetBuffer );
-			if (pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
-			{
-				( void ) usGenerateProtocolChecksum( pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength, pdTRUE );
-			}
-		}
-		#endif
-		
+        #if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
+            {
+                /* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
+                 * It must therefore be implemented in software. */
+                const IPPacket_t * pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxDescriptor->pucEthernetBuffer );
+
+                if( pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
+                {
+                    ( void ) usGenerateProtocolChecksum( pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength, pdTRUE );
+                }
+            }
+        #endif
+
         mac_async_write( &ETHERNET_MAC_0, pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength );
 
         /* Call the standard trace macro to log the send event. */
@@ -356,103 +367,90 @@ void xRxCallback( void )
 
 /* Initializes the GMAC peripheral. This function is based on ASF4 GMAC initialization
  * and REPLACES the Atmel START- generated code, typically located in "driver_init.h".
- * It is compatible with modifications made in Atmel START afterwards because the 
+ * It is compatible with modifications made in Atmel START afterwards because the
  * configuration is saved in "hpl_gmac_config.h". */
 static void prvGMACInit()
 {
-	
-	/* Call the ASF4 generated initialization code */
-	/* Initialize GMAC clock */
-	hri_mclk_set_AHBMASK_GMAC_bit(MCLK);
-	hri_mclk_set_APBCMASK_GMAC_bit(MCLK);
-	
-	/* Apply Atmel START base configuration. */
-	mac_async_init(&ETHERNET_MAC_0, GMAC);
-	prvGMACEnablePHYManagementPort( false );
-	
-	/* Initialize GMAC port */
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 20), PINMUX_PA20L_GMAC_GMDC);
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 21), PINMUX_PA21L_GMAC_GMDIO);
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 13), PINMUX_PA13L_GMAC_GRX0);
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 12), PINMUX_PA12L_GMAC_GRX1);
-	gpio_set_pin_function(GPIO(GPIO_PORTC, 20), PINMUX_PC20L_GMAC_GRXDV);
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 18), PINMUX_PA18L_GMAC_GTX0);
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 19), PINMUX_PA19L_GMAC_GTX1);
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 14), PINMUX_PA14L_GMAC_GTXCK);
-	gpio_set_pin_function(GPIO(GPIO_PORTA, 17), PINMUX_PA17L_GMAC_GTXEN);
-	
-	/* Set GMAC Filtering */
-	struct mac_async_filter mac_filter;
-	memcpy(mac_filter.mac, ipLOCAL_MAC_ADDRESS, ipMAC_ADDRESS_LENGTH_BYTES);
-	mac_filter.tid_enable = false;
-	mac_async_set_filter(&ETHERNET_MAC_0, 0, &mac_filter);
-	#if ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
-	{
-		/* Set hardware filter for LLMNR capability. */
-		memcpy(mac_filter.mac, ucLLMNR_MAC_address, ipMAC_ADDRESS_LENGTH_BYTES);
-		/* LLMNR requires responders to listen to both TCP and UDP protocols. */
-		mac_filter.tid_enable = false;
-		mac_async_set_filter(&ETHERNET_MAC_0, 1, &mac_filter);
-	}
-	#endif
-	
-	/* Set GMAC interrupt priority to be compatible with FreeRTOS API */
-	NVIC_SetPriority( GMAC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY >> (8 - configPRIO_BITS) );
-	
-	/* Register callbacks */
-	mac_async_disable_irq( &ETHERNET_MAC_0 );
-	mac_async_register_callback( &ETHERNET_MAC_0, MAC_ASYNC_RECEIVE_CB, ( FUNC_PTR ) xRxCallback );
-	mac_async_enable_irq( &ETHERNET_MAC_0 );
-	
-	
+    /* Call the ASF4 generated initialization code */
+    /* Initialize GMAC clock */
+    hri_mclk_set_AHBMASK_GMAC_bit( MCLK );
+    hri_mclk_set_APBCMASK_GMAC_bit( MCLK );
+
+    /* Apply Atmel START base configuration. */
+    mac_async_init( &ETHERNET_MAC_0, GMAC );
+    prvGMACEnablePHYManagementPort( false );
+
+    /* Initialize GMAC port */
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 20 ), PINMUX_PA20L_GMAC_GMDC );
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 21 ), PINMUX_PA21L_GMAC_GMDIO );
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 13 ), PINMUX_PA13L_GMAC_GRX0 );
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 12 ), PINMUX_PA12L_GMAC_GRX1 );
+    gpio_set_pin_function( GPIO( GPIO_PORTC, 20 ), PINMUX_PC20L_GMAC_GRXDV );
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 18 ), PINMUX_PA18L_GMAC_GTX0 );
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 19 ), PINMUX_PA19L_GMAC_GTX1 );
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 14 ), PINMUX_PA14L_GMAC_GTXCK );
+    gpio_set_pin_function( GPIO( GPIO_PORTA, 17 ), PINMUX_PA17L_GMAC_GTXEN );
+
+    /* Set GMAC Filtering */
+    struct mac_async_filter mac_filter;
+    memcpy( mac_filter.mac, ipLOCAL_MAC_ADDRESS, ipMAC_ADDRESS_LENGTH_BYTES );
+    mac_filter.tid_enable = false;
+    mac_async_set_filter( &ETHERNET_MAC_0, 0, &mac_filter );
+    #if ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
+        {
+            /* Set hardware filter for LLMNR capability. */
+            memcpy( mac_filter.mac, ucLLMNR_MAC_address, ipMAC_ADDRESS_LENGTH_BYTES );
+            /* LLMNR requires responders to listen to both TCP and UDP protocols. */
+            mac_filter.tid_enable = false;
+            mac_async_set_filter( &ETHERNET_MAC_0, 1, &mac_filter );
+        }
+    #endif
+
+    /* Set GMAC interrupt priority to be compatible with FreeRTOS API */
+    NVIC_SetPriority( GMAC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY >> ( 8 - configPRIO_BITS ) );
+
+    /* Register callbacks */
+    mac_async_disable_irq( &ETHERNET_MAC_0 );
+    mac_async_register_callback( &ETHERNET_MAC_0, MAC_ASYNC_RECEIVE_CB, ( FUNC_PTR ) xRxCallback );
+    mac_async_enable_irq( &ETHERNET_MAC_0 );
+
+    mac_async_enable( &ETHERNET_MAC_0 );
 }
 
-static void prvGMACUpdateLinkProperties()
+static inline void prvGMACEnablePHYManagementPort( bool enable )
 {
-	uint16_t phy_link_mode = 0;
-	prvGMACEnablePHYManagementPort( true );
-	mac_async_read_phy_reg(&ETHERNET_MAC_0, ETHERNET_PHY_0_desc.addr, 0x1E, &phy_link_mode);
-	prvGMACEnablePHYManagementPort( false );
-	uint8_t full_duplex = (phy_link_mode & 0b100) >> 2;
-	uint8_t speed_100_mbps = (phy_link_mode & 0b10) >> 1;
-	
-	prvGMACEnableFullDuplex(full_duplex);
-	prvGMACEnable100Mbps(speed_100_mbps);
+    if( enable )
+    {
+        ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCR.reg |= GMAC_NCR_MPE;
+    }
+    else
+    {
+        ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCR.reg &= ~GMAC_NCR_MPE;
+    }
+}
+static inline void prvGMACEnable100Mbps( bool enable )
+{
+    if( enable )
+    {
+        ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCFGR.reg |= GMAC_NCFGR_SPD;
+    }
+    else
+    {
+        ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCFGR.reg &= ~GMAC_NCFGR_SPD;
+    }
+}
+static inline void prvGMACEnableFullDuplex( bool enable )
+{
+    if( enable )
+    {
+        ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCFGR.reg |= GMAC_NCFGR_FD;
+    }
+    else
+    {
+        ( ( Gmac * ) ETHERNET_MAC_0.dev.hw )->NCFGR.reg &= ~GMAC_NCFGR_FD;
+    }
 }
 
-static inline void prvGMACEnablePHYManagementPort(bool enable)
-{
-	if (enable)
-	{
-		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCR.reg |= GMAC_NCR_MPE;
-	}
-	else
-	{
-		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCR.reg &= ~GMAC_NCR_MPE;
-	}
-}
-static inline void prvGMACEnable100Mbps(bool enable)
-{
-	if (enable)
-	{
-		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg |= GMAC_NCFGR_SPD;
-	}
-	else
-	{
-		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg &= ~GMAC_NCFGR_SPD;
-	}
-}
-static inline void prvGMACEnableFullDuplex(bool enable)
-{
-	if (enable)
-	{
-		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg |= GMAC_NCFGR_FD;
-	}
-	else
-	{
-		((Gmac *)ETHERNET_MAC_0.dev.hw)->NCFGR.reg &= ~GMAC_NCFGR_FD;
-	}
-}
 
 /*********************************************************************/
 /*                           PHY functions                           */
@@ -462,47 +460,68 @@ static inline void prvGMACEnableFullDuplex(bool enable)
 /* Initializes the PHY hardware. Based on ASF4 generated code. */
 static void prvPHYInit()
 {
-	prvGMACEnablePHYManagementPort( true );
-	
-	mac_async_enable(&ETHERNET_MAC_0);
-	ethernet_phy_init(&ETHERNET_PHY_0_desc, &ETHERNET_MAC_0, CONF_ETHERNET_PHY_0_IEEE8023_MII_PHY_ADDRESS);
-	#if CONF_ETHERNET_PHY_0_IEEE8023_MII_CONTROL_REG0_SETTING == 1
-		ethernet_phy_write_reg(&ETHERNET_PHY_0_desc, MDIO_REG0_BMCR, CONF_ETHERNET_PHY_0_IEEE8023_MII_CONTROL_REG0);
-	#endif /* CONF_ETHERNET_PHY_0_IEEE8023_MII_CONTROL_REG0_SETTING */
-	
-	/* By default, the KSZ8081RND expects a 50 MHz crystal, unlike the KSZ8081RNA */
-	#if ( defined( KSZ8081RND_25MHZ ) && KSZ8081RND_25MHZ == 1 )
-		uint16_t phy_reg_pcr2_val = 0;
-		mac_async_read_phy_reg(ETHERNET_MAC_0, ETHERNET_PHY_0_desc.addr, KSZ8081RNA_PCR2, &phy_reg_pcr2_val );
-		phy_reg_pcr2_val = phy_reg_pcr2_val & ( 0x1 << 7 );
-		mac_async_write_phy_reg(ETHERNET_MAC_0, ETHERNET_PHY_0_desc.addr, KSZ8081RNA_PCR2, phy_reg_pcr2_val );
-	#endif /* ( defined( KSZ8081RND_25MHZ ) && KSZ8081RND_25MHZ == 1 ) */
-	
-	prvGMACEnablePHYManagementPort( false );
+    prvGMACEnablePHYManagementPort( true );
+
+    vPhyInitialise( &xPhyObject, &xPHYRead, &xPHYWrite );
+    xPhyDiscover( &xPhyObject );
+    xPhyConfigure( &xPhyObject, &xPHYProperties );
+
+    prvGMACEnablePHYManagementPort( false );
 }
 
 
-/* Start a new autonegotiation on the PHY link and wait until link is up.
- * Will also start a new negotiation every 5 seconds if link is still down by then. */
+/* Start a new link negotiation on the PHY and wait until link is up. */
 static void prvPHYLinkReset()
 {
-	prvGMACEnablePHYManagementPort( true );
-	
-    do
+    /* Restart an auto-negotiation */
+    prvGMACEnablePHYManagementPort( true );
+
+    if( ( xPHYProperties.ucDuplex == PHY_DUPLEX_AUTO ) && ( xPHYProperties.ucSpeed == PHY_SPEED_AUTO ) && ( xPHYProperties.ucMDI_X == PHY_MDIX_AUTO ) )
     {
-        uint16_t retry_count = 0;
+        /* Auto-negotiation */
+        xPhyStartAutoNegotiation( &xPhyObject, xPhyGetMask( &xPhyObject ) );
 
-        /* Restart an auto-negotiation */
-        ethernet_phy_restart_autoneg( &ETHERNET_PHY_0_desc );
+        /* Update the MAC with the auto-negotiation result parameters. */
+        prvGMACEnableFullDuplex( xPhyObject.xPhyProperties.ucDuplex == PHY_DUPLEX_FULL );
+        prvGMACEnable100Mbps( xPhyObject.xPhyProperties.ucSpeed == PHY_SPEED_100 );
+    }
+    else
+    {
+        /* Fixed values */
+        xPhyObject.xPhyPreferences.ucDuplex = xPHYProperties.ucDuplex;
+        xPhyObject.xPhyPreferences.ucSpeed = xPHYProperties.ucSpeed;
+        xPhyObject.xPhyPreferences.ucMDI_X = xPHYProperties.ucMDI_X;
+        xPhyFixedValue( &xPhyObject, xPhyGetMask( &xPhyObject ) );
 
-        /* Wait for PHY link up */
-        for(retry_count = 0; retry_count < 5000 && !phy_link_state; retry_count++)
-        {
-            ethernet_phy_get_link_status( &ETHERNET_PHY_0_desc, &phy_link_state );
-			vTaskDelay( 1 );
-        }
-		prvGMACUpdateLinkProperties();
-    } while( phy_link_state != pdTRUE );
-	
-	prvGMACEnablePHYManagementPort( false );
+        /* Update the MAC with the auto-negotiation result parameters. */
+        prvGMACEnableFullDuplex( xPHYProperties.ucDuplex == PHY_DUPLEX_FULL );
+        prvGMACEnable100Mbps( xPHYProperties.ucSpeed == PHY_SPEED_100 );
+    }
+
+    prvGMACEnablePHYManagementPort( false );
+}
+
+static BaseType_t xPHYRead( BaseType_t xAddress,
+                            BaseType_t xRegister,
+                            uint32_t * pulValue )
+{
+    prvGMACEnablePHYManagementPort( true );
+    BaseType_t readStatus = mac_async_read_phy_reg( &ETHERNET_MAC_0, xAddress, xRegister, ( ( uint16_t * ) pulValue ) );
+    prvGMACEnablePHYManagementPort( false );
+    return readStatus;
+}
+
+static BaseType_t xPHYWrite( BaseType_t xAddress,
+                             BaseType_t xRegister,
+                             uint32_t pulValue )
+{
+    prvGMACEnablePHYManagementPort( true );
+    BaseType_t writeStatus = mac_async_write_phy_reg( &ETHERNET_MAC_0, xAddress, xRegister, pulValue );
+    prvGMACEnablePHYManagementPort( false );
+    return writeStatus;
+}
+
+static inline bool bPHYGetLinkStatus( void )
+{
+    return( xPhyObject.ulLinkStatusMask != 0 );
 }
