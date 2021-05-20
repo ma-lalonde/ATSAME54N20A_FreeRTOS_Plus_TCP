@@ -42,7 +42,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
@@ -84,7 +83,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
@@ -108,7 +106,6 @@
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
       <Value>../hri</Value>
-      <Value>../ethernet_phy</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
