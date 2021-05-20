@@ -36,7 +36,7 @@
 /* Atmel ASF includes */
 #include "hal_mac_async.h"
 #include "hpl_gmac_config.h"
-#include "hal_gpio.h"
+#include "driver_init.h"
 
 /* FreeRTOS includes */
 #include "FreeRTOS.h"
@@ -67,6 +67,8 @@
     static const uint8_t ucLLMNR_MAC_address[] = { 0x01, 0x00, 0x5E, 0x00, 0x00, 0xFC };
 #endif
 
+/* Receive task refresh time */
+#define RECEIVE_BLOCK_TIME_MS    1000
 
 /***********************************************/
 /*              FreeRTOS variables             */
@@ -208,103 +210,100 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
 
     for( ; ; )
     {
-        if( bPHYGetLinkStatus() )
+        /* Wait for the Ethernet MAC interrupt to indicate that another packet
+         * has been received.  The task notification is used in a similar way to a
+         * counting semaphore to count Rx events, but is a lot more efficient than
+         * a semaphore. */
+        ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( RECEIVE_BLOCK_TIME_MS ) );
+
+        /* See how much data was received.  Here it is assumed ReceiveSize() is
+         * a peripheral driver function that returns the number of bytes in the
+         * received Ethernet frame. */
+        xBytesReceived = mac_async_read_len( &ETHERNET_MAC_0 );
+
+        if( xBytesReceived > 0 )
         {
-            /* Wait for the Ethernet MAC interrupt to indicate that another packet
-             * has been received.  The task notification is used in a similar way to a
-             * counting semaphore to count Rx events, but is a lot more efficient than
-             * a semaphore. */
-            ulTaskNotifyTake( pdFALSE, pdMS_TO_TICKS( 1000 ) );
+            /* Allocate a network buffer descriptor that points to a buffer
+             * large enough to hold the received frame.  As this is the simple
+             * rather than efficient example the received data will just be copied
+             * into this buffer. */
+            pxBufferDescriptor = pxGetNetworkBufferWithDescriptor( xBytesReceived, 0 );
 
-            /* See how much data was received.  Here it is assumed ReceiveSize() is
-             * a peripheral driver function that returns the number of bytes in the
-             * received Ethernet frame. */
-            xBytesReceived = mac_async_read_len( &ETHERNET_MAC_0 );
-
-            if( xBytesReceived > 0 )
+            if( pxBufferDescriptor != NULL )
             {
-                /* Allocate a network buffer descriptor that points to a buffer
-                 * large enough to hold the received frame.  As this is the simple
-                 * rather than efficient example the received data will just be copied
-                 * into this buffer. */
-                pxBufferDescriptor = pxGetNetworkBufferWithDescriptor( xBytesReceived, 0 );
-
-                if( pxBufferDescriptor != NULL )
-                {
-                    /* pxBufferDescriptor->pucEthernetBuffer now points to an Ethernet
-                     * buffer large enough to hold the received data.  Copy the
-                     * received data into pcNetworkBuffer->pucEthernetBuffer.  Here it
-                     * is assumed ReceiveData() is a peripheral driver function that
-                     * copies the received data into a buffer passed in as the function's
-                     * parameter.  Remember! While is is a simple robust technique -
-                     * it is not efficient.  An example that uses a zero copy technique
-                     * is provided further down this page. */
-                    xBytesRead = mac_async_read( &ETHERNET_MAC_0, pxBufferDescriptor->pucEthernetBuffer, xBytesReceived );
-                    pxBufferDescriptor->xDataLength = xBytesRead;
+                /* pxBufferDescriptor->pucEthernetBuffer now points to an Ethernet
+                 * buffer large enough to hold the received data.  Copy the
+                 * received data into pcNetworkBuffer->pucEthernetBuffer.  Here it
+                 * is assumed ReceiveData() is a peripheral driver function that
+                 * copies the received data into a buffer passed in as the function's
+                 * parameter.  Remember! While is is a simple robust technique -
+                 * it is not efficient.  An example that uses a zero copy technique
+                 * is provided further down this page. */
+                xBytesRead = mac_async_read( &ETHERNET_MAC_0, pxBufferDescriptor->pucEthernetBuffer, xBytesReceived );
+                pxBufferDescriptor->xDataLength = xBytesRead;
 
 
-                    #if ( ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM == 1 )
-                        {
-                            /* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
-                             * It must therefore be implemented in software. */
-                            pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxBufferDescriptor->pucEthernetBuffer );
-
-                            if( pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
-                            {
-                                xICMPChecksumResult = usGenerateProtocolChecksum( pxBufferDescriptor->pucEthernetBuffer, pxBufferDescriptor->xDataLength, pdFALSE );
-                            }
-                            else
-                            {
-                                xICMPChecksumResult = ipCORRECT_CRC; /* Reset the result value in case this is not an ICMP packet. */
-                            }
-                        }
-                    #endif /* if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 ) */
-
-                    /* See if the data contained in the received Ethernet frame needs
-                    * to be processed.  NOTE! It is preferable to do this in
-                    * the interrupt service routine itself, which would remove the need
-                    * to unblock this task for packets that don't need processing. */
-                    if( ( ipCONSIDER_FRAME_FOR_PROCESSING( pxBufferDescriptor->pucEthernetBuffer ) == eProcessBuffer ) &&
-                        ( xICMPChecksumResult == ipCORRECT_CRC ) )
+                #if ( ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM == 1 )
                     {
-                        /* The event about to be sent to the TCP/IP is an Rx event. */
-                        xRxEvent.eEventType = eNetworkRxEvent;
+                        /* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
+                         * It must therefore be implemented in software. */
+                        pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxBufferDescriptor->pucEthernetBuffer );
 
-                        /* pvData is used to point to the network buffer descriptor that
-                         * now references the received data. */
-                        xRxEvent.pvData = ( void * ) pxBufferDescriptor;
-
-                        /* Send the data to the TCP/IP stack. */
-                        if( xSendEventStructToIPTask( &xRxEvent, 0 ) == pdFALSE )
+                        if( pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
                         {
-                            /* The buffer could not be sent to the IP task so the buffer
-                             * must be released. */
-                            vReleaseNetworkBufferAndDescriptor( pxBufferDescriptor );
-
-                            /* Make a call to the standard trace macro to log the
-                             * occurrence. */
-                            iptraceETHERNET_RX_EVENT_LOST();
+                            xICMPChecksumResult = usGenerateProtocolChecksum( pxBufferDescriptor->pucEthernetBuffer, pxBufferDescriptor->xDataLength, pdFALSE );
                         }
                         else
                         {
-                            /* The message was successfully sent to the TCP/IP stack.
-                            * Call the standard trace macro to log the occurrence. */
-                            iptraceNETWORK_INTERFACE_RECEIVE();
+                            xICMPChecksumResult = ipCORRECT_CRC; /* Reset the result value in case this is not an ICMP packet. */
                         }
+                    }
+                #endif /* if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 ) */
+
+                /* See if the data contained in the received Ethernet frame needs
+                * to be processed.  NOTE! It is preferable to do this in
+                * the interrupt service routine itself, which would remove the need
+                * to unblock this task for packets that don't need processing. */
+                if( ( ipCONSIDER_FRAME_FOR_PROCESSING( pxBufferDescriptor->pucEthernetBuffer ) == eProcessBuffer ) &&
+                    ( xICMPChecksumResult == ipCORRECT_CRC ) )
+                {
+                    /* The event about to be sent to the TCP/IP is an Rx event. */
+                    xRxEvent.eEventType = eNetworkRxEvent;
+
+                    /* pvData is used to point to the network buffer descriptor that
+                     * now references the received data. */
+                    xRxEvent.pvData = ( void * ) pxBufferDescriptor;
+
+                    /* Send the data to the TCP/IP stack. */
+                    if( xSendEventStructToIPTask( &xRxEvent, 0 ) == pdFALSE )
+                    {
+                        /* The buffer could not be sent to the IP task so the buffer
+                         * must be released. */
+                        vReleaseNetworkBufferAndDescriptor( pxBufferDescriptor );
+
+                        /* Make a call to the standard trace macro to log the
+                         * occurrence. */
+                        iptraceETHERNET_RX_EVENT_LOST();
                     }
                     else
                     {
-                        /* The Ethernet frame can be dropped, but the Ethernet buffer
-                         * must be released. */
-                        vReleaseNetworkBufferAndDescriptor( pxBufferDescriptor );
+                        /* The message was successfully sent to the TCP/IP stack.
+                        * Call the standard trace macro to log the occurrence. */
+                        iptraceNETWORK_INTERFACE_RECEIVE();
                     }
                 }
                 else
                 {
-                    /* The event was lost because a network buffer was not available.
-                     * Call the standard trace macro to log the occurrence. */
-                    iptraceETHERNET_RX_EVENT_LOST();
+                    /* The Ethernet frame can be dropped, but the Ethernet buffer
+                     * must be released. */
+                    vReleaseNetworkBufferAndDescriptor( pxBufferDescriptor );
                 }
+            }
+            else
+            {
+                /* The event was lost because a network buffer was not available.
+                 * Call the standard trace macro to log the occurrence. */
+                iptraceETHERNET_RX_EVENT_LOST();
             }
         }
 
@@ -350,14 +349,14 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
 
         /* Call the standard trace macro to log the send event. */
         iptraceNETWORK_INTERFACE_TRANSMIT();
+    }
 
-        if( xReleaseAfterSend != pdFALSE )
-        {
-            /* It is assumed SendData() copies the data out of the FreeRTOS+TCP Ethernet
-             * buffer.  The Ethernet buffer is therefore no longer needed, and must be
-             * freed for re-use. */
-            vReleaseNetworkBufferAndDescriptor( pxDescriptor );
-        }
+    if( xReleaseAfterSend != pdFALSE )
+    {
+        /* It is assumed SendData() copies the data out of the FreeRTOS+TCP Ethernet
+         * buffer.  The Ethernet buffer is therefore no longer needed, and must be
+         * freed for re-use. */
+        vReleaseNetworkBufferAndDescriptor( pxDescriptor );
     }
 
     return pdTRUE;
@@ -374,39 +373,25 @@ void xRxCallback( void )
 /*********************************************************************/
 
 /* Initializes the GMAC peripheral. This function is based on ASF4 GMAC initialization
- * and REPLACES the Atmel START- generated code, typically located in "driver_init.h".
+ * and uses the Atmel START- generated code, typically located in "driver_init.h".
+ * Make sure the initialization function is not called twice, e.g. comment out the call in "driver_init.c".
  * It is compatible with modifications made in Atmel START afterwards because the
  * configuration is saved in "hpl_gmac_config.h". */
 static void prvGMACInit()
 {
-    /* Call the ASF4 generated initialization code */
-    /* Initialize GMAC clock */
-    hri_mclk_set_AHBMASK_GMAC_bit( MCLK );
-    hri_mclk_set_APBCMASK_GMAC_bit( MCLK );
-
-    /* Apply Atmel START base configuration. */
-    mac_async_init( &ETHERNET_MAC_0, GMAC );
+    /* Apply Atmel START base configuration and initialize clocks and GPIO. */
+    ETHERNET_MAC_0_init();
     prvGMACEnablePHYManagementPort( false );
 
-    /* Initialize GMAC port */
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 20 ), PINMUX_PA20L_GMAC_GMDC );
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 21 ), PINMUX_PA21L_GMAC_GMDIO );
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 13 ), PINMUX_PA13L_GMAC_GRX0 );
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 12 ), PINMUX_PA12L_GMAC_GRX1 );
-    gpio_set_pin_function( GPIO( GPIO_PORTC, 20 ), PINMUX_PC20L_GMAC_GRXDV );
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 18 ), PINMUX_PA18L_GMAC_GTX0 );
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 19 ), PINMUX_PA19L_GMAC_GTX1 );
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 14 ), PINMUX_PA14L_GMAC_GTXCK );
-    gpio_set_pin_function( GPIO( GPIO_PORTA, 17 ), PINMUX_PA17L_GMAC_GTXEN );
-
-    /* Set GMAC Filtering */
+    /* Set GMAC Filtering for own MAC address */
     struct mac_async_filter mac_filter;
     memcpy( mac_filter.mac, ipLOCAL_MAC_ADDRESS, ipMAC_ADDRESS_LENGTH_BYTES );
     mac_filter.tid_enable = false;
     mac_async_set_filter( &ETHERNET_MAC_0, 0, &mac_filter );
+
+    /* Set GMAC filtering for LLMNR, if defined. */
     #if ( defined( ipconfigUSE_LLMNR ) && ( ipconfigUSE_LLMNR == 1 ) )
         {
-            /* Set hardware filter for LLMNR capability. */
             memcpy( mac_filter.mac, ucLLMNR_MAC_address, ipMAC_ADDRESS_LENGTH_BYTES );
             /* LLMNR requires responders to listen to both TCP and UDP protocols. */
             mac_filter.tid_enable = false;
@@ -417,7 +402,7 @@ static void prvGMACInit()
     /* Set GMAC interrupt priority to be compatible with FreeRTOS API */
     NVIC_SetPriority( GMAC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY >> ( 8 - configPRIO_BITS ) );
 
-    /* Register callbacks */
+    /* Register callback(s). Currently only RX callback is implemented, but TX callback can be added the same way. */
     mac_async_disable_irq( &ETHERNET_MAC_0 );
     mac_async_register_callback( &ETHERNET_MAC_0, MAC_ASYNC_RECEIVE_CB, ( FUNC_PTR ) xRxCallback );
     mac_async_enable_irq( &ETHERNET_MAC_0 );

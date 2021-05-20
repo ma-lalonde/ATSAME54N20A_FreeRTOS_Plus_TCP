@@ -23,6 +23,8 @@ Features
 
 Log
 ---
+2021-05-20:
+- Moved GMAC clock and GPIO initialization out of [NetworkInterface.c](ATSAME54N20A_FreeRTOS_Plus_TCP/FreeRTOS/FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAME5/NetworkInterface.c).
 
 2021-05-18:
 - Implement LLMNR and unique chip ID
