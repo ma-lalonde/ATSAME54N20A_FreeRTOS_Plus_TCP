@@ -54,6 +54,20 @@
 /*           Configuration variables           */
 /***********************************************/
 
+/* Check for optimal performance parameters */
+#if ( CONF_GMAC_NCFGR_RXCOEN == 0 )
+	#warning This driver works best with RX CRC offloading enabled.
+#endif
+
+#if ( CONF_GMAC_DCFGR_TXCOEN == 0 )
+	#warning This driver works best with TX CRC offloading enabled.
+#endif
+
+#if ( CONF_GMAC_NCFGR_CAF != 0 )
+	#warning This driver includes GMAC hardware frame filtering for better performance.
+#endif
+
+
 /* Make sure someone takes care of the CRC calculation */
 #if ( ( CONF_GMAC_NCFGR_RXCOEN == 0 ) && ( ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM == 1 ) )
     #error Receive CRC offloading should be enabled.
