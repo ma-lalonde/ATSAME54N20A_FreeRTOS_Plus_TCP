@@ -12,6 +12,8 @@ The demo uses many helper functions located in the [Application](ATSAME54N20A_Fr
 
 Also note that no part of coreMQTT / coreMQTT-Agent has been implemented yet, although all necessary files and configuration are present.
 
+This Network Interface's development is referenced [on the FreeRTOS forums](https://forums.freertos.org/t/freertos-tcp-on-sam-e5x).
+
 Features
 --------
 - DHCP
