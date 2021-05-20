@@ -56,15 +56,15 @@
 
 /* Check for optimal performance parameters */
 #if ( CONF_GMAC_NCFGR_RXCOEN == 0 )
-	#warning This driver works best with RX CRC offloading enabled.
+    #warning This driver works best with RX CRC offloading enabled.
 #endif
 
 #if ( CONF_GMAC_DCFGR_TXCOEN == 0 )
-	#warning This driver works best with TX CRC offloading enabled.
+    #warning This driver works best with TX CRC offloading enabled.
 #endif
 
 #if ( CONF_GMAC_NCFGR_CAF != 0 )
-	#warning This driver includes GMAC hardware frame filtering for better performance.
+    #warning This driver includes GMAC hardware frame filtering for better performance.
 #endif
 
 
@@ -396,7 +396,7 @@ static void prvGMACInit()
     /* Apply Atmel START base configuration and initialize clocks and GPIO. */
     ETHERNET_MAC_0_init();
     prvGMACEnablePHYManagementPort( false );
-	mac_async_disable_irq( &ETHERNET_MAC_0 );
+    mac_async_disable_irq( &ETHERNET_MAC_0 );
 
     /* Set GMAC Filtering for own MAC address */
     struct mac_async_filter mac_filter;
@@ -419,9 +419,9 @@ static void prvGMACInit()
 
     /* Register callback(s). Currently only RX callback is implemented, but TX callback can be added the same way. */
     mac_async_register_callback( &ETHERNET_MAC_0, MAC_ASYNC_RECEIVE_CB, ( FUNC_PTR ) xRxCallback );
-    
-	/* Start the GMAC. */
-	mac_async_enable_irq( &ETHERNET_MAC_0 );
+
+    /* Start the GMAC. */
+    mac_async_enable_irq( &ETHERNET_MAC_0 );
     mac_async_enable( &ETHERNET_MAC_0 );
 }
 
