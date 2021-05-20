@@ -382,6 +382,7 @@ static void prvGMACInit()
     /* Apply Atmel START base configuration and initialize clocks and GPIO. */
     ETHERNET_MAC_0_init();
     prvGMACEnablePHYManagementPort( false );
+	mac_async_disable_irq( &ETHERNET_MAC_0 );
 
     /* Set GMAC Filtering for own MAC address */
     struct mac_async_filter mac_filter;
@@ -403,10 +404,10 @@ static void prvGMACInit()
     NVIC_SetPriority( GMAC_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY >> ( 8 - configPRIO_BITS ) );
 
     /* Register callback(s). Currently only RX callback is implemented, but TX callback can be added the same way. */
-    mac_async_disable_irq( &ETHERNET_MAC_0 );
     mac_async_register_callback( &ETHERNET_MAC_0, MAC_ASYNC_RECEIVE_CB, ( FUNC_PTR ) xRxCallback );
-    mac_async_enable_irq( &ETHERNET_MAC_0 );
-
+    
+	/* Start the GMAC. */
+	mac_async_enable_irq( &ETHERNET_MAC_0 );
     mac_async_enable( &ETHERNET_MAC_0 );
 }
 
