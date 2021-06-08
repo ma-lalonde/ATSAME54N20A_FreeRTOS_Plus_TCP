@@ -8,9 +8,7 @@ The PCB might be published later, when the rest of the hardware is fully validat
 The project should be imported in Microchip Studio 7.0.
 
 The driver uses Atmel Start ASF4 generated MAC and PHY drivers, along with the code in [NetworkInterface.c](ATSAME54N20A_FreeRTOS_Plus_TCP/FreeRTOS/FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAME5/NetworkInterface.c).
-The demo uses many helper functions located in the [Application](ATSAME54N20A_FreeRTOS_Plus_TCP/Application/) folder.
-
-Also note that no part of coreMQTT / coreMQTT-Agent has been implemented yet, although all necessary files and configuration are present.
+The demo uses many helper functions located in the [User_code](ATSAME54N20A_FreeRTOS_Plus_TCP/User_code/) folder.
 
 This Network Interface's development is referenced [on the FreeRTOS forums](https://forums.freertos.org/t/freertos-tcp-on-sam-e5x).
 

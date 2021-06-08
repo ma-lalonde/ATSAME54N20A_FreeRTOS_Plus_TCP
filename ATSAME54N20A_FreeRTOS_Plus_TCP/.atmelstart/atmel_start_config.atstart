@@ -1074,7 +1074,7 @@ drivers:
       gmac_arch_mii_cfg: true
       gmac_arch_ncfgr_caf: false
       gmac_arch_ncfgr_clk: '48'
-      gmac_arch_ncfgr_dcpf: true
+      gmac_arch_ncfgr_dcpf: false
       gmac_arch_ncfgr_df: true
       gmac_arch_ncfgr_dnvlan: false
       gmac_arch_ncfgr_efrhd: false

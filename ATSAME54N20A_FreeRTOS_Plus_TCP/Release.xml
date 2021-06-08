@@ -12,18 +12,10 @@
   <armgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>%24(PackRepoDir)\arm\CMSIS\5.4.0\CMSIS\Core\Include\</Value>
-      <Value>../Application/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Kernel/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM4F</Value>
       <Value>../FreeRTOS/FreeRTOS-Plus-TCP/include</Value>
       <Value>../FreeRTOS/FreeRTOS-Plus-TCP/portable/Compiler/GCC</Value>
-      <Value>../FreeRTOS/Utilities/backoff_algorithm/source/include</Value>
-      <Value>../FreeRTOS/Utilities/logging</Value>
-      <Value>../FreeRTOS/Application-Protocols/coreMQTT/source/include</Value>
-      <Value>../FreeRTOS/Application-Protocols/coreMQTT/source/interface</Value>
-      <Value>../FreeRTOS/Application-Protocols/coreMQTT-Agent/source/include</Value>
-      <Value>../FreeRTOS/Application-Protocols/network_transport/freertos_plus_tcp/using_plaintext</Value>
-      <Value>../FreeRTOS/Application-Protocols/network_transport/freertos_plus_tcp</Value>
       <Value>../FreeRTOS/FreeRTOS-Plus-TCP/portable/NetworkInterface/include</Value>
       <Value>../Config</Value>
       <Value>../</Value>
@@ -41,8 +33,15 @@
       <Value>../hpl/port</Value>
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
+      <Value>../hpl/usb</Value>
       <Value>../hri</Value>
+      <Value>../usb</Value>
+      <Value>../usb/class/cdc</Value>
+      <Value>../usb/class/cdc/device</Value>
+      <Value>../usb/device</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
+      <Value>../User_code/Application/include</Value>
+      <Value>../User_code/Configuration</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -82,7 +81,12 @@
       <Value>../hpl/port</Value>
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
+      <Value>../hpl/usb</Value>
       <Value>../hri</Value>
+      <Value>../usb</Value>
+      <Value>../usb/class/cdc</Value>
+      <Value>../usb/class/cdc/device</Value>
+      <Value>../usb/device</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
@@ -105,7 +109,12 @@
       <Value>../hpl/port</Value>
       <Value>../hpl/ramecc</Value>
       <Value>../hpl/trng</Value>
+      <Value>../hpl/usb</Value>
       <Value>../hri</Value>
+      <Value>../usb</Value>
+      <Value>../usb/class/cdc</Value>
+      <Value>../usb/class/cdc/device</Value>
+      <Value>../usb/device</Value>
       <Value>%24(PackRepoDir)\atmel\SAME54_DFP\1.1.134\include</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>

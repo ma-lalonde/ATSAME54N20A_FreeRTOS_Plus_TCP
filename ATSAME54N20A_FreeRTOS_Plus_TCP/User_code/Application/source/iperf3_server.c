@@ -97,9 +97,9 @@
 #endif
 
 #ifndef ipconfigIPERF_TX_BUFSIZE
-	#define ipconfigIPERF_TX_BUFSIZE				( 16 * 1024 )	/* Units of bytes. */
+	#define ipconfigIPERF_TX_BUFSIZE				( 8 * ipconfigTCP_MSS )	/* Units of bytes. */
 	#define ipconfigIPERF_TX_WINSIZE				( 8 )			/* Size in units of MSS */
-	#define ipconfigIPERF_RX_BUFSIZE				( 16 * 1024 )	/* Units of bytes. */
+	#define ipconfigIPERF_RX_BUFSIZE				( 8 * ipconfigTCP_MSS )	/* Units of bytes. */
 	#define ipconfigIPERF_RX_WINSIZE				( 8 )			/* Size in units of MSS */
 #endif
 

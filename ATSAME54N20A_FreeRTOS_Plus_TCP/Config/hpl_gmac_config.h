@@ -211,7 +211,7 @@
 // <i> transmission of frames as required.
 // <id> gmac_arch_ncfgr_dcpf
 #ifndef CONF_GMAC_NCFGR_DCPF
-#define CONF_GMAC_NCFGR_DCPF 1
+#define CONF_GMAC_NCFGR_DCPF 0
 #endif
 
 // <q> Receive Checksum Offload Enable
