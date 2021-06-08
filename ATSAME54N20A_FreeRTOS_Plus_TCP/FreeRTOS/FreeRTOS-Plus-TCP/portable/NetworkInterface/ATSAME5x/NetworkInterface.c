@@ -35,6 +35,7 @@
 
 /* Atmel ASF includes */
 #include "hal_mac_async.h"
+#include "hpl_mac_async.h"
 #include "hpl_gmac_config.h"
 /* Include MAC initialization function here: */
 #include "platform.h"
@@ -375,7 +376,7 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
 
 		/* This example assumes GetNextTxDescriptor() is an Ethernet MAC driver library
 		function that returns a pointer to a DMA descriptor of type DMADescriptor_t. */
-		pxDMATxDescriptor = _txbuf_descrs[_txbuf_index];
+		pxDMATxDescriptor = &_txbuf_descrs[_txbuf_index];
 
 		/* Further, this example assumes the DMADescriptor_t type has a member
 		called pucEthernetBuffer that points to the buffer the DMA will transmit, and
@@ -384,12 +385,14 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
 		still be pointing to the buffer it last transmitted.  If this is the case
 		then the old buffer must be released (returned to the TCP/IP stack) before
 		descriptor is updated to point to the new data waiting to be transmitted. */
-		if( pxDMATxDescriptor->address != NULL )
-		{
-			/* Note this is releasing just an Ethernet buffer, not a network buffer
-			descriptor as the descriptor has already been released. */
-			vReleaseNetworkBuffer( pxDMATxDescriptor->address );
-		}
+		#if ipUSE_STATIC_ALLOCATION == 0
+			if( pxDMATxDescriptor->address != 0 )
+			{
+				/* Note this is releasing just an Ethernet buffer, not a network buffer
+				descriptor as the descriptor has already been released. */
+				vReleaseNetworkBuffer( (uint8_t *)pxDMATxDescriptor->address );
+			}
+		#endif
 
 		/* Configure the DMA descriptor to send the data referenced by the network buffer
 		descriptor.  This example assumes SendData() is an Ethernet peripheral driver
