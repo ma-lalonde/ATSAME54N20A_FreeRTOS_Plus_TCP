@@ -23,19 +23,24 @@ extern "C" {
 
 #include <hal_rand_sync.h>
 
+#include "hal_usb_device.h"
+
 #include <hal_mac_async.h>
 
 extern struct rand_sync_desc RAND_0;
 
-extern struct mac_async_descriptor ETHERNET_MAC_0;
+extern struct mac_async_descriptor ETH_MAC;
 
 void RAND_0_CLOCK_init(void);
 void RAND_0_init(void);
 
-void ETHERNET_MAC_0_CLOCK_init(void);
-void ETHERNET_MAC_0_init(void);
-void ETHERNET_MAC_0_PORT_init(void);
-void ETHERNET_MAC_0_example(void);
+void USB_DEVICE_INSTANCE_CLOCK_init(void);
+void USB_DEVICE_INSTANCE_init(void);
+
+void ETH_MAC_CLOCK_init(void);
+void ETH_MAC_init(void);
+void ETH_MAC_PORT_init(void);
+void ETH_MAC_example(void);
 
 /**
  * \brief Perform system initialization, initialize pins and clocks for

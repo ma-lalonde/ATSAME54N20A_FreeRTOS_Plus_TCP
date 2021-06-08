@@ -370,7 +370,7 @@
 #endif
 
 #ifndef ipconfigUSE_DHCP_HOOK
-    #define ipconfigUSE_DHCP_HOOK    0
+    #define ipconfigUSE_DHCP_HOOK    1
 #endif
 
 #ifndef ipconfigDHCP_FALL_BACK_AUTO_IP

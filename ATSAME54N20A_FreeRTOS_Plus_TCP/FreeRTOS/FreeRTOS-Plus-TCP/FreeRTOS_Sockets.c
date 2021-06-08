@@ -4444,7 +4444,7 @@ void vSocketWakeUpUser( FreeRTOS_Socket_t * pxSocket )
                 if( pxSocket->u.xTCP.ucTCPState == ( uint8_t ) eTCP_LISTEN )
                 {
                     /* Using function "snprintf". */
-                    const int32_t copied_len = snprintf( ucChildText, sizeof( ucChildText ), " %d/%d",
+                    const int32_t copied_len = snprintf( ucChildText, sizeof( ucChildText ), " %ld/%ld",
                                                          ( int32_t ) pxSocket->u.xTCP.usChildCount,
                                                          ( int32_t ) pxSocket->u.xTCP.usBacklog );
                     ( void ) copied_len;

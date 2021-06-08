@@ -13,7 +13,7 @@
 
 struct rand_sync_desc RAND_0;
 
-struct mac_async_descriptor ETHERNET_MAC_0;
+struct mac_async_descriptor ETH_MAC;
 
 void RAND_0_CLOCK_init(void)
 {
@@ -26,7 +26,122 @@ void RAND_0_init(void)
 	rand_sync_init(&RAND_0, TRNG);
 }
 
-void ETHERNET_MAC_0_PORT_init(void)
+void USB_DEVICE_INSTANCE_PORT_init(void)
+{
+
+	gpio_set_pin_direction(PA24,
+	                       // <y> Pin direction
+	                       // <id> pad_direction
+	                       // <GPIO_DIRECTION_OFF"> Off
+	                       // <GPIO_DIRECTION_IN"> In
+	                       // <GPIO_DIRECTION_OUT"> Out
+	                       GPIO_DIRECTION_OUT);
+
+	gpio_set_pin_level(PA24,
+	                   // <y> Initial level
+	                   // <id> pad_initial_level
+	                   // <false"> Low
+	                   // <true"> High
+	                   false);
+
+	gpio_set_pin_pull_mode(PA24,
+	                       // <y> Pull configuration
+	                       // <id> pad_pull_config
+	                       // <GPIO_PULL_OFF"> Off
+	                       // <GPIO_PULL_UP"> Pull-up
+	                       // <GPIO_PULL_DOWN"> Pull-down
+	                       GPIO_PULL_OFF);
+
+	gpio_set_pin_function(PA24,
+	                      // <y> Pin function
+	                      // <id> pad_function
+	                      // <i> Auto : use driver pinmux if signal is imported by driver, else turn off function
+	                      // <PINMUX_PA24H_USB_DM"> Auto
+	                      // <GPIO_PIN_FUNCTION_OFF"> Off
+	                      // <GPIO_PIN_FUNCTION_A"> A
+	                      // <GPIO_PIN_FUNCTION_B"> B
+	                      // <GPIO_PIN_FUNCTION_C"> C
+	                      // <GPIO_PIN_FUNCTION_D"> D
+	                      // <GPIO_PIN_FUNCTION_E"> E
+	                      // <GPIO_PIN_FUNCTION_F"> F
+	                      // <GPIO_PIN_FUNCTION_G"> G
+	                      // <GPIO_PIN_FUNCTION_H"> H
+	                      // <GPIO_PIN_FUNCTION_I"> I
+	                      // <GPIO_PIN_FUNCTION_J"> J
+	                      // <GPIO_PIN_FUNCTION_K"> K
+	                      // <GPIO_PIN_FUNCTION_L"> L
+	                      // <GPIO_PIN_FUNCTION_M"> M
+	                      // <GPIO_PIN_FUNCTION_N"> N
+	                      PINMUX_PA24H_USB_DM);
+
+	gpio_set_pin_direction(PA25,
+	                       // <y> Pin direction
+	                       // <id> pad_direction
+	                       // <GPIO_DIRECTION_OFF"> Off
+	                       // <GPIO_DIRECTION_IN"> In
+	                       // <GPIO_DIRECTION_OUT"> Out
+	                       GPIO_DIRECTION_OUT);
+
+	gpio_set_pin_level(PA25,
+	                   // <y> Initial level
+	                   // <id> pad_initial_level
+	                   // <false"> Low
+	                   // <true"> High
+	                   false);
+
+	gpio_set_pin_pull_mode(PA25,
+	                       // <y> Pull configuration
+	                       // <id> pad_pull_config
+	                       // <GPIO_PULL_OFF"> Off
+	                       // <GPIO_PULL_UP"> Pull-up
+	                       // <GPIO_PULL_DOWN"> Pull-down
+	                       GPIO_PULL_OFF);
+
+	gpio_set_pin_function(PA25,
+	                      // <y> Pin function
+	                      // <id> pad_function
+	                      // <i> Auto : use driver pinmux if signal is imported by driver, else turn off function
+	                      // <PINMUX_PA25H_USB_DP"> Auto
+	                      // <GPIO_PIN_FUNCTION_OFF"> Off
+	                      // <GPIO_PIN_FUNCTION_A"> A
+	                      // <GPIO_PIN_FUNCTION_B"> B
+	                      // <GPIO_PIN_FUNCTION_C"> C
+	                      // <GPIO_PIN_FUNCTION_D"> D
+	                      // <GPIO_PIN_FUNCTION_E"> E
+	                      // <GPIO_PIN_FUNCTION_F"> F
+	                      // <GPIO_PIN_FUNCTION_G"> G
+	                      // <GPIO_PIN_FUNCTION_H"> H
+	                      // <GPIO_PIN_FUNCTION_I"> I
+	                      // <GPIO_PIN_FUNCTION_J"> J
+	                      // <GPIO_PIN_FUNCTION_K"> K
+	                      // <GPIO_PIN_FUNCTION_L"> L
+	                      // <GPIO_PIN_FUNCTION_M"> M
+	                      // <GPIO_PIN_FUNCTION_N"> N
+	                      PINMUX_PA25H_USB_DP);
+}
+
+/* The USB module requires a GCLK_USB of 48 MHz ~ 0.25% clock
+ * for low speed and full speed operation. */
+#if (CONF_GCLK_USB_FREQUENCY > (48000000 + 48000000 / 400)) || (CONF_GCLK_USB_FREQUENCY < (48000000 - 48000000 / 400))
+#warning USB clock should be 48MHz ~ 0.25% clock, check your configuration!
+#endif
+
+void USB_DEVICE_INSTANCE_CLOCK_init(void)
+{
+
+	hri_gclk_write_PCHCTRL_reg(GCLK, USB_GCLK_ID, CONF_GCLK_USB_SRC | GCLK_PCHCTRL_CHEN);
+	hri_mclk_set_AHBMASK_USB_bit(MCLK);
+	hri_mclk_set_APBBMASK_USB_bit(MCLK);
+}
+
+void USB_DEVICE_INSTANCE_init(void)
+{
+	USB_DEVICE_INSTANCE_CLOCK_init();
+	usb_d_init();
+	USB_DEVICE_INSTANCE_PORT_init();
+}
+
+void ETH_MAC_PORT_init(void)
 {
 
 	gpio_set_pin_function(PA20, PINMUX_PA20L_GMAC_GMDC);
@@ -48,23 +163,23 @@ void ETHERNET_MAC_0_PORT_init(void)
 	gpio_set_pin_function(PA17, PINMUX_PA17L_GMAC_GTXEN);
 }
 
-void ETHERNET_MAC_0_CLOCK_init(void)
+void ETH_MAC_CLOCK_init(void)
 {
 	hri_mclk_set_AHBMASK_GMAC_bit(MCLK);
 	hri_mclk_set_APBCMASK_GMAC_bit(MCLK);
 }
 
-void ETHERNET_MAC_0_init(void)
+void ETH_MAC_init(void)
 {
-	ETHERNET_MAC_0_CLOCK_init();
-	mac_async_init(&ETHERNET_MAC_0, GMAC);
-	ETHERNET_MAC_0_PORT_init();
+	ETH_MAC_CLOCK_init();
+	mac_async_init(&ETH_MAC, GMAC);
+	ETH_MAC_PORT_init();
 }
 
-void ETHERNET_MAC_0_example(void)
+void ETH_MAC_example(void)
 {
-	mac_async_enable(&ETHERNET_MAC_0);
-	mac_async_write(&ETHERNET_MAC_0, (uint8_t *)"Hello World!", 12);
+	mac_async_enable(&ETH_MAC);
+	mac_async_write(&ETH_MAC, (uint8_t *)"Hello World!", 12);
 }
 
 void system_init(void)
@@ -87,5 +202,7 @@ void system_init(void)
 
 	RAND_0_init();
 
-	//ETHERNET_MAC_0_init();
+	USB_DEVICE_INSTANCE_init();
+
+	ETH_MAC_init();
 }
