@@ -113,11 +113,12 @@
  * otherwise to 0, to save RAM. From Iperf testing, there is no point in using
  * static allocation with a non zero-copy driver.
  */
-#define ipUSE_STATIC_ALLOCATION		0
+#define ipUSE_STATIC_ALLOCATION		1
 #if ( defined( ipUSE_STATIC_ALLOCATION ) && ( ipUSE_STATIC_ALLOCATION == 1 ))
 	/* 1536 bytes is more than needed, 1524 would be enough.
 	 * But 1536 is a multiple of 32, which gives a great alignment for cached memories. */
 	#define NETWORK_BUFFER_SIZE    1536
+	COMPILER_ALIGNED(32)
 	static uint8_t ucBuffers[ ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS ][ NETWORK_BUFFER_SIZE ];
 #endif /* ( defined( ipUSE_STATIC_ALLOCATION ) && ( ipUSE_STATIC_ALLOCATION == 1 )) */
 
@@ -349,19 +350,13 @@ static void prvEMACDeferredInterruptHandlerTask( void * pvParameters )
     }
 }
 
+
+extern struct _mac_txbuf_descriptor _txbuf_descrs[CONF_GMAC_TXDESCR_NUM];
+extern volatile uint32_t _txbuf_index;
 BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescriptor,
                                     BaseType_t xReleaseAfterSend )
 {
-    /* Simple network interfaces (as opposed to more efficient zero copy network
-     * interfaces) just use Ethernet peripheral driver library functions to copy
-     * data from the FreeRTOS+TCP buffer into the peripheral driver's own buffer.
-     * This example assumes SendData() is a peripheral driver library function that
-     * takes a pointer to the start of the data to be sent and the length of the
-     * data to be sent as two separate parameters.  The start of the data is located
-     * by pxDescriptor->pucEthernetBuffer.  The length of the data is located
-     * by pxDescriptor->xDataLength. */
-
-    if( bPHYGetLinkStatus() )
+	if( bPHYGetLinkStatus() )
     {
         #if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
             {
@@ -375,23 +370,98 @@ BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescript
                 }
             }
         #endif
+	
+		struct _mac_txbuf_descriptor *pxDMATxDescriptor;
 
-        mac_async_write( &ETH_MAC, pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength );
+		/* This example assumes GetNextTxDescriptor() is an Ethernet MAC driver library
+		function that returns a pointer to a DMA descriptor of type DMADescriptor_t. */
+		pxDMATxDescriptor = _txbuf_descrs[_txbuf_index];
 
-        /* Call the standard trace macro to log the send event. */
-        iptraceNETWORK_INTERFACE_TRANSMIT();
-    }
+		/* Further, this example assumes the DMADescriptor_t type has a member
+		called pucEthernetBuffer that points to the buffer the DMA will transmit, and
+		a member called xDataLength that holds the length of the data the DMA will
+		transmit.  If BufferAllocation_2.c is being used then the DMA descriptor may
+		still be pointing to the buffer it last transmitted.  If this is the case
+		then the old buffer must be released (returned to the TCP/IP stack) before
+		descriptor is updated to point to the new data waiting to be transmitted. */
+		if( pxDMATxDescriptor->address != NULL )
+		{
+			/* Note this is releasing just an Ethernet buffer, not a network buffer
+			descriptor as the descriptor has already been released. */
+			vReleaseNetworkBuffer( pxDMATxDescriptor->address );
+		}
 
+		/* Configure the DMA descriptor to send the data referenced by the network buffer
+		descriptor.  This example assumes SendData() is an Ethernet peripheral driver
+		function. */
+		//pxDMATxDescriptor->struct _mac_txbuf_descriptor = pxDescriptor->pucEthernetBuffer;
+		//pxDMATxDescriptor->status-> = pxDescriptor->xDataLength;
+		mac_async_write( &ETH_MAC, pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength );
+
+		/* Call the standard trace macro to log the send event. */
+		iptraceNETWORK_INTERFACE_TRANSMIT();
+
+	}
+    /* The network buffer descriptor must now be returned to the TCP/IP stack, but
+    the Ethernet buffer referenced by the network buffer descriptor is still in
+    use by the DMA.  Remove the reference to the Ethernet buffer from the network
+    buffer descriptor so releasing the network buffer descriptor does not result
+    in the Ethernet buffer also being released.  xReleaseAfterSend() should never
+    equal pdFALSE when  ipconfigZERO_COPY_TX_DRIVER is set to 1 (as it should be
+    if data is transmitted using a zero copy driver.*/
     if( xReleaseAfterSend != pdFALSE )
     {
-        /* It is assumed SendData() copies the data out of the FreeRTOS+TCP Ethernet
-         * buffer.  The Ethernet buffer is therefore no longer needed, and must be
-         * freed for re-use. */
+        pxDescriptor->pucEthernetBuffer = NULL;
         vReleaseNetworkBufferAndDescriptor( pxDescriptor );
     }
 
     return pdTRUE;
 }
+
+
+//BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxDescriptor,
+                                    //BaseType_t xReleaseAfterSend )
+//{
+    ///* Simple network interfaces (as opposed to more efficient zero copy network
+     //* interfaces) just use Ethernet peripheral driver library functions to copy
+     //* data from the FreeRTOS+TCP buffer into the peripheral driver's own buffer.
+     //* This example assumes SendData() is a peripheral driver library function that
+     //* takes a pointer to the start of the data to be sent and the length of the
+     //* data to be sent as two separate parameters.  The start of the data is located
+     //* by pxDescriptor->pucEthernetBuffer.  The length of the data is located
+     //* by pxDescriptor->xDataLength. */
+//
+    //if( bPHYGetLinkStatus() )
+    //{
+        //#if ( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 1 )
+            //{
+                ///* the Atmel SAM GMAC peripheral does not support hardware CRC offloading for ICMP packets.
+                 //* It must therefore be implemented in software. */
+                //const IPPacket_t * pxIPPacket = ipCAST_CONST_PTR_TO_CONST_TYPE_PTR( IPPacket_t, pxDescriptor->pucEthernetBuffer );
+//
+                //if( pxIPPacket->xIPHeader.ucProtocol == ( uint8_t ) ipPROTOCOL_ICMP )
+                //{
+                    //( void ) usGenerateProtocolChecksum( pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength, pdTRUE );
+                //}
+            //}
+        //#endif
+//
+        //mac_async_write( &ETH_MAC, pxDescriptor->pucEthernetBuffer, pxDescriptor->xDataLength );
+//
+        ///* Call the standard trace macro to log the send event. */
+        //iptraceNETWORK_INTERFACE_TRANSMIT();
+    //}
+//
+    //if( xReleaseAfterSend != pdFALSE )
+    //{
+        ///* It is assumed SendData() copies the data out of the FreeRTOS+TCP Ethernet
+         //* buffer.  The Ethernet buffer is therefore no longer needed, and must be
+         //* freed for re-use. */
+        //vReleaseNetworkBufferAndDescriptor( pxDescriptor );
+    //}
+//
+    //return pdTRUE;
+//}
 
 void xRxCallback( void )
 {

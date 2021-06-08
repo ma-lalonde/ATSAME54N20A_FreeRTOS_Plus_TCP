@@ -88,7 +88,7 @@ used as defaults. */
 #define	ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME	( 5000 )
 
 #define ipconfigZERO_COPY_RX_DRIVER			( 0 )
-#define ipconfigZERO_COPY_TX_DRIVER			( 0 )
+#define ipconfigZERO_COPY_TX_DRIVER			( 1 )
 
 /* Include support for LLMNR: Link-local Multicast Name Resolution
 (non-Microsoft) */
