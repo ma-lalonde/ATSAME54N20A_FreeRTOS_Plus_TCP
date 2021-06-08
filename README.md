@@ -2,7 +2,7 @@ ATSAME54N20A_FreeRTOS_Plus_TCP
 ==============================
 
 This is a simple demo of an in progress FreeRTOS+TCP driver for the ATSAME54N20A (SAM E54), which should also work for any SAM E5X.
-The test board consists of a ATSAME54N20A and a KSZ8081RNAIA, both powered by a +3V3 LDO regulator and fed by a 25 MHz clock.
+The test board consists of a ATSAME54N20A and a KSZ8081RNA/RND, both powered by a +3V3 LDO regulator and fed by a 25 MHz clock.
 The PCB might be published later, when the rest of the hardware is fully validated.
 
 The project should be imported in Microchip Studio 7.0.
@@ -25,6 +25,11 @@ Features
 
 Log
 ---
+2021-06-08:
+- Added Iperf3 server code (16 Mbps achieved)
+- PHY initialization updated for KSZ8081RND
+
+
 2021-05-20:
 - Moved GMAC clock and GPIO initialization out of [NetworkInterface.c](ATSAME54N20A_FreeRTOS_Plus_TCP/FreeRTOS/FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAME5/NetworkInterface.c).
 - Add configuration checks.
