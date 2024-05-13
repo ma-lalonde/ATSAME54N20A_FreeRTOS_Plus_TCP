@@ -1,3 +1,5 @@
+Note: This repository will not be updated.
+
 ATSAME54N20A_FreeRTOS_Plus_TCP
 ==============================
 
